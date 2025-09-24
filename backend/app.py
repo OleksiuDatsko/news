@@ -42,6 +42,6 @@ def create_app(config_name='default'):
     return app
 
 if __name__ == '__main__':
-    config_name = os.environ.get('FLASK_CONFIG', 'development')
+    config_name = os.environ.get('FLASK_CONFIG', 'default')
     app = create_app(config_name)
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)
