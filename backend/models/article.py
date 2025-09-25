@@ -1,28 +1,71 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, Enum
+from sqlalchemy import (
+    Column, Text, Boolean, BigInteger, DateTime, ForeignKey, Numeric, func
+)
 from sqlalchemy.orm import relationship
-from models import BaseModel, TimestampMixin
-from enum import Enum as PyEnum
+from models.base import BaseModel
 
-class ArticleStatus(PyEnum):
-    DRAFT = "draft"
-    PUBLISHED = "published"
-    ARCHIVED = "archived"
 
-class Article(BaseModel, TimestampMixin):
-    __tablename__ = 'articles'
-    
-    title = Column(String(200), nullable=False)
+class Article(BaseModel):
+    __tablename__ = "articles"
+    author_id = Column(BigInteger, ForeignKey("authors.id"), nullable=False)
+    category_id = Column(BigInteger, ForeignKey("categories.id"))
+    title = Column(Text, nullable=False)
     content = Column(Text, nullable=False)
-    author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    # category_id = Column(Integer, ForeignKey('categories.id'), nullable=True)
-    status = Column(Enum(ArticleStatus), default=ArticleStatus.DRAFT)
-    views_count = Column(Integer, default=0)
-    likes_count = Column(Integer, default=0)
-    is_searchable = Column(Boolean, default=True)
-    
-    # Relationships
-    author = relationship("User", backref="articles")
-    # category = relationship("Category", backref="articles") 
-    
-    def __repr__(self):
-        return f"<Article(id={self.id}, title={self.title[:50]})>"
+    status = Column(Text, nullable=False, default="draft")
+    is_exclusive = Column(Boolean, nullable=False, default=False)
+    is_breaking = Column(Boolean, nullable=False, default=False)
+    views_count = Column(BigInteger, nullable=False, default=0)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    author = relationship("Author", back_populates="articles")
+    category = relationship("Category", back_populates="articles")
+    keywords = relationship("ArticleKeyword", back_populates="article")
+    views = relationship("ArticleView", back_populates="article")
+    comments = relationship("Comment", back_populates="article")
+    interactions = relationship("ArticleInteraction", back_populates="article")
+    notifications = relationship("Notification", back_populates="article")
+
+
+class ArticleKeyword(BaseModel):
+    __tablename__ = "article_keywords"
+    article_id = Column(BigInteger, ForeignKey("articles.id"), nullable=False)
+    keyword = Column(Text, nullable=False)
+    article = relationship("Article", back_populates="keywords")
+
+
+class ArticleView(BaseModel):
+    __tablename__ = "article_views"
+    article_id = Column(BigInteger, ForeignKey("articles.id"), nullable=False)
+    user_id = Column(BigInteger, ForeignKey("users.id"))
+    session_id = Column(Text)
+    ip_address = Column(Text)
+    viewed_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    article = relationship("Article", back_populates="views")
+    user = relationship("User", back_populates="article_views")
+
+
+class Comment(BaseModel):
+    __tablename__ = "comments"
+    article_id = Column(BigInteger, ForeignKey("articles.id"), nullable=False)
+    user_id = Column(BigInteger, ForeignKey("users.id"))
+    reply_id = Column(BigInteger, ForeignKey("comments.id"))
+    text = Column(Text, nullable=False)
+    status = Column(Text, nullable=False, default="active")
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    article = relationship("Article", back_populates="comments")
+    user = relationship("User", back_populates="comments")
+    replies = relationship("Comment", backref=relationship("reply", remote_side=[BaseModel.id]))
+
+
+class ArticleInteraction(BaseModel):
+    __tablename__ = "article_interactions"
+    article_id = Column(BigInteger, ForeignKey("articles.id"), nullable=False)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    interaction_type = Column(Text, nullable=False)
+    value = Column(Numeric)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    article = relationship("Article", back_populates="interactions")
+    user = relationship("User", back_populates="interactions")

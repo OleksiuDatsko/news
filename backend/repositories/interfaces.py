@@ -34,3 +34,13 @@ class IDatabaseConnection(ABC):
     @abstractmethod
     def create_tables(self):
         pass
+
+    @property
+    @abstractmethod
+    def metadata(self):
+        pass
+
+    @property
+    @abstractmethod
+    def db(self):
+        pass
