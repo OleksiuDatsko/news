@@ -47,7 +47,6 @@ jobs:
           IMAGE=ghcr.io/oleksiudatsko/news-backend
           docker build -t $IMAGE:latest -t $IMAGE:${{ env.VERSION }} ./backend
           docker push $IMAGE:latest
-          docker push $IMAGE:${{ env.VERSION }}
 
   build-frontend:
     needs: detect-changes
@@ -72,4 +71,3 @@ jobs:
           IMAGE=ghcr.io/oleksiudatsko/news-frontend
           docker build -t $IMAGE:latest -t $IMAGE:${{ env.VERSION }} ./frontend
           docker push $IMAGE:latest
-          docker push $IMAGE:${{ env.VERSION }}
