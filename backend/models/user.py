@@ -9,7 +9,6 @@ class User(BaseModel):
     email = Column(Text, unique=True, nullable=False)
     password = Column(Text, nullable=False)
     username = Column(Text, unique=True, nullable=False)
-    role = Column(Text, nullable=False, default="free")
     preferences = Column(JSON, default={})
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
@@ -21,3 +20,12 @@ class User(BaseModel):
     subscriptions = relationship("UserSubscriptionPlan", back_populates="user")
     newsletter_subs = relationship("NewsletterSubscription", back_populates="user")
     notifications = relationship("Notification", back_populates="user")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "email": self.email,
+            "username": self.username,
+            "preferences": self.preferences,
+            "created_at": self.created_at.isoformat(),
+        }

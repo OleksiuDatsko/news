@@ -32,3 +32,27 @@ class UserSubscriptionPlan(BaseModel):
 
     user = relationship("User", back_populates="subscriptions")
     plan = relationship("SubscriptionPlan", back_populates="users")
+
+    @property
+    def left_days(self):
+        if self.plan.price_per_month is None:
+            return None
+        from datetime import datetime, timedelta
+        elapsed = timedelta(days=(datetime.now() - self.start_date).days).days
+        return max(0, 30 - elapsed)
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "plan_id": self.plan_id,
+            "start_date": self.start_date.isoformat(),
+            "is_active": self.is_active,
+            "plan": {
+                "name": self.plan.name,
+                "permissions": self.plan.permissions,
+                "price_per_month": float(self.plan.price_per_month) if self.plan.price_per_month else None,
+                "description": self.plan.description,
+            },
+            "left_days": self.left_days,
+        }

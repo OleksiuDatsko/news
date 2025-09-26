@@ -11,7 +11,7 @@ class AuthService:
         self.access_expires = timedelta(seconds=access_expires)
         self.refresh_expires = timedelta(seconds=refresh_expires)
 
-    def register(self, email: str, password: str, username: str, role: str = "free") -> dict:
+    def register(self, email: str, password: str, username: str) -> dict:
         """
         Реєструє нового користувача.
         Повертає словник з access_token та refresh_token.
@@ -30,7 +30,6 @@ class AuthService:
             "email": email,
             "password": hashed_password,
             "username": username,
-            "role": role,
             "preferences": {}
         }
         
@@ -52,7 +51,8 @@ class AuthService:
 
     def authenticate(self, email: str, password: str) -> dict:
         """Існуючий метод для аутентифікації"""
-        user = self.user_repo.get_by_email(email)
+        user = self.user_repo.get_by(email=email)
+        print(user)
         if not user or not check_password_hash(user.password, password):
             raise ValueError("Невірний email або пароль")
 
@@ -66,7 +66,6 @@ class AuthService:
                 "id": user.id,
                 "email": user.email,
                 "username": user.username,
-                "role": user.role
             }
         }
 
@@ -89,7 +88,7 @@ class AuthService:
     
     def get_current_user(self, user_id: int):
         """Повертає користувача за його ID"""
-        user = self.user_repo.get_by_id(user_id)
+        user = self.user_repo.get_by(id=user_id)
         if not user:
             raise ValueError("Користувача не знайдено")
         return user

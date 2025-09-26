@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from middleware.auth_middleware import token_required
-from repositories.user import get_user_repo
+from repositories import get_user_repo
 from services.auth_service import AuthService
 
 auth_bp = Blueprint('auth', __name__)
@@ -24,7 +24,6 @@ def register():
             email=data.get('email'),
             password=data.get('password'),
             username=data.get('username'),
-            role=data.get('role', 'free')  # за замовчуванням роль "free"
         )
         return jsonify(result), 201
     except ValueError as e:
