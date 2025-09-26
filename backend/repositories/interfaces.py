@@ -26,21 +26,3 @@ class IArticleRepository(ABC):
     def get_all(self, page: int = 1, per_page: int = 10, filters: dict = None):
         pass
 
-class IDatabaseConnection(ABC):
-    @abstractmethod
-    def get_session(self):
-        pass
-    
-    @abstractmethod
-    def create_tables(self):
-        pass
-
-    @property
-    @abstractmethod
-    def metadata(self):
-        pass
-
-    @property
-    @abstractmethod
-    def db(self):
-        pass

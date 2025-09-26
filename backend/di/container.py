@@ -1,5 +1,5 @@
 from typing import Dict, Any, TypeVar, Type
-from repositories.interfaces import IDatabaseConnection
+from database import IDatabaseConnection
 from database.connections import SQLiteDatabaseConnection, PostgreSQLDatabaseConnection
 
 T = TypeVar('T')

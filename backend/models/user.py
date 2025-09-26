@@ -14,7 +14,6 @@ class User(BaseModel):
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     # relationships
-    articles = relationship("Article", back_populates="author")
     article_views = relationship("ArticleView", back_populates="user")
     comments = relationship("Comment", back_populates="user")
     interactions = relationship("ArticleInteraction", back_populates="user")

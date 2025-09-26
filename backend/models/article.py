@@ -1,7 +1,7 @@
 from sqlalchemy import (
     Column, Text, Boolean, BigInteger, DateTime, ForeignKey, Numeric, func
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref, remote
 from models.base import BaseModel
 
 
@@ -49,14 +49,12 @@ class Comment(BaseModel):
     __tablename__ = "comments"
     article_id = Column(BigInteger, ForeignKey("articles.id"), nullable=False)
     user_id = Column(BigInteger, ForeignKey("users.id"))
-    reply_id = Column(BigInteger, ForeignKey("comments.id"))
     text = Column(Text, nullable=False)
     status = Column(Text, nullable=False, default="active")
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     article = relationship("Article", back_populates="comments")
     user = relationship("User", back_populates="comments")
-    replies = relationship("Comment", backref=relationship("reply", remote_side=[BaseModel.id]))
 
 
 class ArticleInteraction(BaseModel):

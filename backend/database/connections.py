@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from repositories.interfaces import IDatabaseConnection
+from database import IDatabaseConnection
 from models.base import Base
 
 

@@ -1,23 +1,25 @@
 from dotenv import load_dotenv
 import os
-
 from flask_migrate import Migrate
-
-load_dotenv()
-
-from flask import Flask
+from database import IDatabaseConnection
+from flask import Flask, current_app, g
 from flask_jwt_extended import JWTManager
 from di.container import configure_dependencies
 from blueprints.auth_controller import auth_bp
 from blueprints.content_controller import content_bp
 from config import config
 
+load_dotenv()
 
 def create_app(config_name="default"):
     app = Flask(__name__)
 
     config_class = config.get(config_name, config["default"])
     app.config.from_object(config_class)
+
+    @app.before_request
+    def attach_container():
+        g.container = current_app.container
 
     jwt = JWTManager()
     jwt.init_app(app)
@@ -28,8 +30,6 @@ def create_app(config_name="default"):
     except Exception as e:
         print(f"Error configuring dependencies: {e}")
         raise
-
-    from repositories.interfaces import IDatabaseConnection
 
     Migrate(app, container.resolve(IDatabaseConnection))
 

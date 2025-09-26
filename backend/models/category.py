@@ -8,8 +8,6 @@ class Category(BaseModel):
 
     name = Column(Text, nullable=False)
     description = Column(Text)
-    parent_id = Column(Integer, ForeignKey("categories.id"))
     is_searchable = Column(Boolean, nullable=False, default=True)
 
-    parent = relationship("Category", remote_side=[BaseModel.id], backref="children")
     articles = relationship("Article", back_populates="category")

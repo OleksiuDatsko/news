@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: 9fe064297efb
+Revision ID: 89c16e458321
 Revises: 
-Create Date: 2025-09-26 00:23:47.167263
+Create Date: 2025-09-26 14:17:29.754404
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '9fe064297efb'
+revision = '89c16e458321'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -40,10 +40,8 @@ def upgrade():
     op.create_table('categories',
     sa.Column('name', sa.Text(), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('parent_id', sa.Integer(), nullable=True),
     sa.Column('is_searchable', sa.Boolean(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.ForeignKeyConstraint(['parent_id'], ['categories.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('subscription_plans',
@@ -146,13 +144,11 @@ def upgrade():
     op.create_table('comments',
     sa.Column('article_id', sa.BigInteger(), nullable=False),
     sa.Column('user_id', sa.BigInteger(), nullable=True),
-    sa.Column('reply_id', sa.BigInteger(), nullable=True),
     sa.Column('text', sa.Text(), nullable=False),
     sa.Column('status', sa.Text(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.ForeignKeyConstraint(['article_id'], ['articles.id'], ),
-    sa.ForeignKeyConstraint(['reply_id'], ['comments.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

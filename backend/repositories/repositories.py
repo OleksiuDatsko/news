@@ -1,24 +1,8 @@
-from sqlalchemy.orm import Session
-from repositories.interfaces import IUserRepository, IArticleRepository
+from sqlalchemy.orm import Session, query
+from repositories.interfaces import IArticleRepository
 from models.user import User
 from models.article import Article
 
-class UserRepository(IUserRepository):
-    def __init__(self, db_session: Session):
-        self.db_session = db_session
-    
-    def create(self, user_data: dict):
-        user = User(**user_data)
-        self.db_session.add(user)
-        self.db_session.commit()
-        self.db_session.refresh(user)
-        return user
-    
-    def get_by_id(self, user_id: int):
-        return self.db_session.query(User).filter_by(id=user_id).first()
-    
-    def get_by_email(self, email: str):
-        return self.db_session.query(User).filter_by(email=email).first()
 
 class ArticleRepository(IArticleRepository):
     def __init__(self, db_session: Session):
