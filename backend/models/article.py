@@ -25,6 +25,34 @@ class Article(BaseModel):
     interactions = relationship("ArticleInteraction", back_populates="article")
     notifications = relationship("Notification", back_populates="article")
 
+    def to_dict(self, metadata: bool | None =None):
+        if metadata:
+            return {
+                "id": self.id,
+                "author": self.author.to_dict(),
+                "category": self.category.to_dict() if self.category else None,
+                "title": self.title,
+                "status": self.status,
+                "is_exclusive": self.is_exclusive,
+                "is_breaking": self.is_breaking,
+                "views_count": self.views_count,
+                "created_at": self.created_at.isoformat(),
+                "keywords": [keyword.keyword for keyword in self.keywords],
+            }
+        return {
+            "id": self.id,
+            "author": self.author.to_dict(),
+            "category": self.category.to_dict() if self.category else None,
+            "title": self.title,
+            "content": self.content,
+            "status": self.status,
+            "is_exclusive": self.is_exclusive,
+            "is_breaking": self.is_breaking,
+            "views_count": self.views_count,
+            "created_at": self.created_at.isoformat(),
+            "keywords": [keyword.keyword for keyword in self.keywords],
+        }
+
 
 class ArticleKeyword(BaseModel):
     __tablename__ = "article_keywords"
@@ -61,7 +89,7 @@ class ArticleInteraction(BaseModel):
     __tablename__ = "article_interactions"
     article_id = Column(BigInteger, ForeignKey("articles.id"), nullable=False)
     user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
-    interaction_type = Column(Text, nullable=False)
+    interaction_type = Column(Text, nullable=False) # saved, liked, disliked
     value = Column(Numeric)
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
