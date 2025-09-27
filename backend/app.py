@@ -5,7 +5,7 @@ from database import IDatabaseConnection
 from flask import Flask, current_app, g
 from flask_jwt_extended import JWTManager
 from di.container import configure_dependencies
-from blueprints import auth_bp, content_bp, subscription_bp
+from blueprints import auth_bp, subscription_bp, article_bp
 from config import config
 
 load_dotenv()
@@ -16,6 +16,8 @@ def create_app(config_name="default"):
 
     config_class = config.get(config_name, config["default"])
     app.config.from_object(config_class)
+    app.config['SQLALCHEMY_ECHO'] = False
+
 
     @app.before_request
     def attach_container():
@@ -34,8 +36,9 @@ def create_app(config_name="default"):
     Migrate(app, container.resolve(IDatabaseConnection))
 
     app.register_blueprint(auth_bp, url_prefix="/auth")
-    app.register_blueprint(content_bp, url_prefix="/content")
     app.register_blueprint(subscription_bp, url_prefix="/subscriptions")
+    app.register_blueprint(article_bp, url_prefix="/articles") 
+
 
     @app.route("/")
     def hello():

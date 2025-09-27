@@ -8,7 +8,7 @@ class SQLiteDatabaseConnection(IDatabaseConnection):
     def __init__(self, database_url: str):
         self.database_url = database_url
         self.engine = create_engine(
-            database_url, echo=True, connect_args={"check_same_thread": False}
+            database_url, echo=False, connect_args={"check_same_thread": False}
         )
         self.SessionLocal = sessionmaker(
             autocommit=False, autoflush=False, bind=self.engine

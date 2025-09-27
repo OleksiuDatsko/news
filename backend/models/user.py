@@ -28,4 +28,12 @@ class User(BaseModel):
             "username": self.username,
             "preferences": self.preferences,
             "created_at": self.created_at.isoformat(),
+            "permissions": self.permissions,
         }
+    
+    @property
+    def permissions(self):
+        active_subscription = [sub for sub in self.subscriptions if sub.is_active]
+        if not active_subscription:
+            return []
+        return active_subscription[0].plan.permissions
