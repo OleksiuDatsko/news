@@ -1,7 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import decode_token
-from repositories.interfaces import IUserRepository
-from datetime import timedelta
+from repositories.admin import AdminRepository
 from . import AuthStrategy
 from .token import TokenFactoryProducer
 
@@ -9,7 +8,7 @@ from .token import TokenFactoryProducer
 class AdminAuthService(AuthStrategy):
     def __init__(
         self,
-        admin_repo,
+        admin_repo: AdminRepository,
     ):
         self.admin_repo = admin_repo
 

@@ -1,5 +1,12 @@
 from sqlalchemy import (
-    Column, Text, Boolean, BigInteger, DateTime, ForeignKey, Numeric, func
+    Column,
+    Text,
+    Boolean,
+    BigInteger,
+    DateTime,
+    ForeignKey,
+    Numeric,
+    func,
 )
 from sqlalchemy.orm import relationship, backref, remote
 from models.base import BaseModel
@@ -15,7 +22,9 @@ class Article(BaseModel):
     is_exclusive = Column(Boolean, nullable=False, default=False)
     is_breaking = Column(Boolean, nullable=False, default=False)
     views_count = Column(BigInteger, nullable=False, default=0)
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_at = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
     author = relationship("Author", back_populates="articles")
     category = relationship("Category", back_populates="articles")
@@ -25,7 +34,7 @@ class Article(BaseModel):
     interactions = relationship("ArticleInteraction", back_populates="article")
     notifications = relationship("Notification", back_populates="article")
 
-    def to_dict(self, metadata: bool | None =None):
+    def to_dict(self, metadata: bool | None = None):
         if metadata:
             return {
                 "id": self.id,
@@ -67,7 +76,9 @@ class ArticleView(BaseModel):
     user_id = Column(BigInteger, ForeignKey("users.id"))
     session_id = Column(Text)
     ip_address = Column(Text)
-    viewed_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    viewed_at = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
     article = relationship("Article", back_populates="views")
     user = relationship("User", back_populates="article_views")
@@ -79,7 +90,9 @@ class Comment(BaseModel):
     user_id = Column(BigInteger, ForeignKey("users.id"))
     text = Column(Text, nullable=False)
     status = Column(Text, nullable=False, default="active")
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_at = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
     article = relationship("Article", back_populates="comments")
     user = relationship("User", back_populates="comments")
@@ -89,9 +102,11 @@ class ArticleInteraction(BaseModel):
     __tablename__ = "article_interactions"
     article_id = Column(BigInteger, ForeignKey("articles.id"), nullable=False)
     user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
-    interaction_type = Column(Text, nullable=False) # saved, liked, disliked
+    interaction_type = Column(Text, nullable=False)  # saved, liked, disliked
     value = Column(Numeric)
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_at = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
     article = relationship("Article", back_populates="interactions")
     user = relationship("User", back_populates="interactions")

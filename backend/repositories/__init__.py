@@ -25,9 +25,11 @@ def get_article_repo():
     session = db_conn.get_session()
     return ArticleRepository(session)
 
+
 def get_admin_repo():
     """Повертає екземпляр AdminRepository"""
     db_conn: IDatabaseConnection = g.container.resolve(IDatabaseConnection)
     session = db_conn.get_session()
     from repositories.admin import AdminRepository
+
     return AdminRepository(session)

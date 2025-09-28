@@ -4,6 +4,7 @@ from repositories.repositories import BaseRepository
 from database import IDatabaseConnection
 from models.subscription import SubscriptionPlan, UserSubscriptionPlan
 
+
 class SubscriptionRepository(BaseRepository):
     def __init__(self, db_session: Session):
         super().__init__(db_session, SubscriptionPlan)

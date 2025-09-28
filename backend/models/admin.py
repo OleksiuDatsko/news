@@ -7,7 +7,9 @@ class Admin(BaseModel):
 
     email = Column(Text, unique=True, nullable=False)
     password = Column(Text, nullable=False)
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_at = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
     def to_dict(self):
         return {

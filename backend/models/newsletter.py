@@ -1,6 +1,16 @@
-from sqlalchemy import Column, Text, JSON, BigInteger, DateTime, ForeignKey, Boolean, func
+from sqlalchemy import (
+    Column,
+    Text,
+    JSON,
+    BigInteger,
+    DateTime,
+    ForeignKey,
+    Boolean,
+    func,
+)
 from sqlalchemy.orm import relationship
 from models.base import BaseModel
+
 
 class NewsletterSubscription(BaseModel):
     __tablename__ = "newsletter_subscriptions"
@@ -9,7 +19,9 @@ class NewsletterSubscription(BaseModel):
     type = Column(Text, nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
     props = Column(JSON, default={})
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_at = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
     user = relationship("User", back_populates="newsletter_subs")
     author = relationship("Author", back_populates="newsletter_subs")

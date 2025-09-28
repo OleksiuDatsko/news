@@ -5,7 +5,7 @@ class IDatabaseConnection(ABC):
     @abstractmethod
     def get_session(self):
         pass
-    
+
     @abstractmethod
     def create_tables(self):
         pass

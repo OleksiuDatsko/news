@@ -23,7 +23,7 @@ class SQLiteDatabaseConnection(IDatabaseConnection):
     @property
     def metadata(self):
         return Base.metadata
-    
+
     @property
     def db(self):
         return self.engine
@@ -46,7 +46,7 @@ class PostgreSQLDatabaseConnection(IDatabaseConnection):
     @property
     def metadata(self):
         return Base.metadata
-    
+
     @property
     def db(self):
         return self.engine

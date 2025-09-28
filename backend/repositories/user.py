@@ -1,11 +1,9 @@
-from flask import g
 from repositories.repositories import BaseRepository
-from database import IDatabaseConnection
 from models.user import User
-from repositories.interfaces import IUserRepository
 from sqlalchemy.orm import Session
 
-class UserRepository(BaseRepository, IUserRepository):
+
+class UserRepository(BaseRepository):
     def __init__(self, db_session: Session):
         super().__init__(db_session, User)
 
@@ -15,9 +13,9 @@ class UserRepository(BaseRepository, IUserRepository):
         self.db_session.commit()
         self.db_session.refresh(user)
         return user
-    
+
     def get_by_id(self, user_id: int):
         return self.db_session.query(User).filter_by(id=user_id).first()
-    
+
     def get_by_email(self, email: str):
         return self.db_session.query(User).filter_by(email=email).first()

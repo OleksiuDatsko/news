@@ -1,5 +1,6 @@
 from repositories.subscription import SubscriptionRepository
 
+
 class SubscriptionService:
     def __init__(self, repo: SubscriptionRepository):
         self.repo = repo
@@ -15,6 +16,6 @@ class SubscriptionService:
 
     def get_current_subscription(self, user_id: int):
         return self.repo.get_active_user_subscription(user_id)
-    
+
     def get_subscription_history(self, user_id: int):
         return self.repo.get_user_subscription_history(user_id)

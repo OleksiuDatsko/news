@@ -5,14 +5,15 @@ from typing import Any, Dict
 class TokenFactory(ABC):
     def create_token(self, entity, **kwargs) -> Dict[str, Any]:
         pass
-    
+
     def get_factory_type(self) -> str:
         pass
+
 
 class AuthStrategy:
     def __init__(self, repo):
         self.repo = repo
-        
+
     def register(self, email: str, password: str):
         pass
 

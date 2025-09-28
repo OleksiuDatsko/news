@@ -38,9 +38,10 @@ class UserSubscriptionPlan(BaseModel):
         if self.plan.price_per_month is None:
             return None
         from datetime import datetime, timedelta
+
         elapsed = timedelta(days=(datetime.now() - self.start_date).days).days
         return max(0, 30 - elapsed)
-    
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -51,7 +52,11 @@ class UserSubscriptionPlan(BaseModel):
             "plan": {
                 "name": self.plan.name,
                 "permissions": self.plan.permissions,
-                "price_per_month": float(self.plan.price_per_month) if self.plan.price_per_month else None,
+                "price_per_month": (
+                    float(self.plan.price_per_month)
+                    if self.plan.price_per_month
+                    else None
+                ),
                 "description": self.plan.description,
             },
             "left_days": self.left_days,

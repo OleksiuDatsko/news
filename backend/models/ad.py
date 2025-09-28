@@ -1,6 +1,16 @@
-from sqlalchemy import Column, Text, Boolean, BigInteger, DateTime, ForeignKey, Numeric, func
+from sqlalchemy import (
+    Column,
+    Text,
+    Boolean,
+    BigInteger,
+    DateTime,
+    ForeignKey,
+    Numeric,
+    func,
+)
 from sqlalchemy.orm import relationship
 from models.base import BaseModel
+
 
 class Ad(BaseModel):
     __tablename__ = "ads"
@@ -15,13 +25,16 @@ class Ad(BaseModel):
 
     views = relationship("AdView", back_populates="ad")
 
+
 class AdView(BaseModel):
     __tablename__ = "ad_views"
     ad_id = Column(BigInteger, ForeignKey("ads.id"), nullable=False)
     user_id = Column(BigInteger, ForeignKey("users.id"))
     session_id = Column(Text)
     ip_address = Column(Text)
-    viewed_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    viewed_at = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
     ad = relationship("Ad", back_populates="views")
     user = relationship("User", back_populates="ad_views")

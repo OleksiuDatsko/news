@@ -1,5 +1,9 @@
 from flask import Blueprint, request, jsonify
-from middleware.auth_middleware import token_optional, token_required, permission_required
+from middleware.auth_middleware import (
+    token_optional,
+    token_required,
+    permission_required,
+)
 from repositories import get_article_repo
 from services.article_service import ArticleService
 
@@ -47,8 +51,15 @@ def get_article(current_user, article_id):
             article = article_service.get_article_by_id(article_id, current_user.id)
         else:
             article = article_service.get_article_by_id(article_id)
-        if current_user and not current_user.permissions.get("exclusive_content", False) and article.get("is_exclusive", False):
-            return jsonify({"msg": "Недостатньо прав для доступу до цього ресурсу"}), 403
+        if (
+            current_user
+            and not current_user.permissions.get("exclusive_content", False)
+            and article.get("is_exclusive", False)
+        ):
+            return (
+                jsonify({"msg": "Недостатньо прав для доступу до цього ресурсу"}),
+                403,
+            )
         return jsonify(article), 200
     except ValueError as e:
         return jsonify({"msg": str(e)}), 404

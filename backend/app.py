@@ -16,8 +16,7 @@ def create_app(config_name="default"):
 
     config_class = config.get(config_name, config["default"])
     app.config.from_object(config_class)
-    app.config['SQLALCHEMY_ECHO'] = False
-
+    app.config["SQLALCHEMY_ECHO"] = False
 
     @app.before_request
     def attach_container():
@@ -37,9 +36,8 @@ def create_app(config_name="default"):
 
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(subscription_bp, url_prefix="/subscriptions")
-    app.register_blueprint(article_bp, url_prefix="/articles") 
+    app.register_blueprint(article_bp, url_prefix="/articles")
     app.register_blueprint(admin_bp, url_prefix="/admin")
-
 
     @app.route("/")
     def hello():

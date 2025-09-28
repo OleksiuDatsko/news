@@ -10,7 +10,9 @@ class User(BaseModel):
     password = Column(Text, nullable=False)
     username = Column(Text, unique=True, nullable=False)
     preferences = Column(JSON, default={})
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_at = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
     # relationships
     article_views = relationship("ArticleView", back_populates="user")
@@ -30,7 +32,7 @@ class User(BaseModel):
             "created_at": self.created_at.isoformat(),
             "permissions": self.permissions,
         }
-    
+
     @property
     def permissions(self):
         active_subscription = [sub for sub in self.subscriptions if sub.is_active]
