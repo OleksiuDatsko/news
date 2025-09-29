@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from middleware.auth_middleware import token_required
-from repositories import get_user_repo
+from repositories import get_admin_repo
 from services.auth.user import UserAuthService as AuthService
 
 auth_bp = Blueprint("auth", __name__)
@@ -17,7 +17,7 @@ def register():
     if not data.get("username"):
         return jsonify({"msg": "Ім'я користувача є обов'язковим"}), 400
 
-    user_repo = get_user_repo()
+    user_repo = get_admin_repo()
     auth_service = AuthService(user_repo)
 
     try:
@@ -34,7 +34,7 @@ def register():
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
-    user_repo = get_user_repo()
+    user_repo = get_admin_repo()
     auth_service = AuthService(user_repo)
 
     try:
@@ -47,7 +47,7 @@ def login():
 @auth_bp.route("/refresh", methods=["POST"])
 def refresh():
     data = request.get_json()
-    user_repo = get_user_repo()
+    user_repo = get_admin_repo()
     auth_service = AuthService(user_repo)
 
     try:
