@@ -32,6 +32,10 @@ class User(BaseModel):
             "created_at": self.created_at.isoformat(),
             "permissions": self.permissions,
         }
+    
+    @property
+    def is_admin(self):
+        return False
 
     @property
     def permissions(self):

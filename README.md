@@ -91,6 +91,10 @@ pip install -r requirements.txt
 python app.py
 ```
 
+#### Admin Login
+email: admin@some.com
+password: admin
+
 ### Frontend Setup
 
 1. Install dependencies:

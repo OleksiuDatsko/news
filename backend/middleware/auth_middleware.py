@@ -1,10 +1,9 @@
 from flask import jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from functools import wraps
-from repositories import get_user_repo, get_user_repo
+from repositories import get_user_repo, get_admin_repo
 from services.auth.admin import AdminAuthService
 from services.auth.user import UserAuthService
-
 
 def token_required(f):
     """Декоратор для перевірки JWT токену"""
@@ -12,10 +11,13 @@ def token_required(f):
     @wraps(f)
     @jwt_required()
     def decorated(*args, **kwargs):
-        current_user_id = get_jwt_identity()
-        current_user = UserAuthService(get_user_repo()).get_current_user(
-            current_user_id
-        )
+        current_id = get_jwt_identity()
+        jwt = get_jwt()
+        if jwt.get("type") == "user":
+            current_user = UserAuthService(get_user_repo()).get_current_user(current_id)
+        elif jwt.get("type") == "admin":
+            current_user = AdminAuthService(get_admin_repo()).get_current_admin(current_id)
+
         return f(current_user, *args, **kwargs)
 
     return decorated
@@ -27,10 +29,15 @@ def permission_required(*permissions):
     def decorator(f):
         @wraps(f)
         def decorated(current_user, *args, **kwargs):
+            if current_user.is_admin:
+                return (
+                    jsonify(
+                        {"msg": "Адмін не має доступу"}
+                    ),
+                    418,
+                )
             user_permissions = current_user.permissions
-            print(user_permissions, permissions)
             for permission in permissions:
-                print(permission, user_permissions.get(permission, False))
                 if not user_permissions.get(permission, False):
                     return (
                         jsonify(
@@ -76,7 +83,7 @@ def admin_token_required(f):
                 return jsonify({"msg": "Недостатньо прав"}), 403
             current_admin_id = get_jwt_identity()
             if current_admin_id:
-                current_admin = AdminAuthService(get_user_repo()).get_current_admin(
+                current_admin = AdminAuthService(get_admin_repo()).get_current_admin(
                     current_admin_id
                 )
                 return f(current_admin, *args, **kwargs)

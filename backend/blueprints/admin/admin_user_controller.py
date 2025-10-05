@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash
 from middleware.auth_middleware import admin_token_required
-from repositories import get_user_repo
+from repositories import get_admin_repo
 
 admin_user_bp = Blueprint("admin_user", __name__)
 
@@ -11,7 +11,7 @@ admin_user_bp = Blueprint("admin_user", __name__)
 def get_all_admin_users(current_admin):
     """Отримує всіх адміністраторів"""
     try:
-        admin_repo = get_user_repo()
+        admin_repo = get_admin_repo()
         admin_users = admin_repo.get_all()
 
         result = []
@@ -28,7 +28,7 @@ def get_all_admin_users(current_admin):
 def get_admin_user(current_admin, admin_id):
     """Отримує адміністратора за ID"""
     try:
-        admin_repo = get_user_repo()
+        admin_repo = get_admin_repo()
         admin = admin_repo.get_by(id=admin_id)
         if not admin:
             return jsonify({"msg": "Адміністратора не знайдено"}), 404
@@ -45,7 +45,7 @@ def update_admin_user(current_admin, admin_id):
     data = request.get_json()
 
     try:
-        admin_repo = get_user_repo()
+        admin_repo = get_admin_repo()
         admin = admin_repo.get_by(id=admin_id)
         if not admin:
             return jsonify({"msg": "Адміністратора не знайдено"}), 404
@@ -83,7 +83,7 @@ def delete_admin_user(current_admin, admin_id):
         if current_admin.id == admin_id:
             return jsonify({"msg": "Ви не можете видалити свій власний аккаунт"}), 403
 
-        admin_repo = get_user_repo()
+        admin_repo = get_admin_repo()
         admin = admin_repo.get_by(id=admin_id)
         if not admin:
             return jsonify({"msg": "Адміністратора не знайдено"}), 404
@@ -107,7 +107,7 @@ def change_admin_password(current_admin, admin_id):
         return jsonify({"msg": "Пароль повинен містити мінімум 6 символів"}), 400
 
     try:
-        admin_repo = get_user_repo()
+        admin_repo = get_admin_repo()
         user = admin_repo.get_by(id=admin_id)
         if not user:
             return jsonify({"msg": "Адміністратора не знайдено"}), 404

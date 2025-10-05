@@ -17,7 +17,6 @@ def get_all_users(current_admin):
         user_repo = get_user_repo()
         users = user_repo.get_all()
 
-        # Простий варіант пагінації
         start = (page - 1) * per_page
         end = start + per_page
         paginated_users = users[start:end]
