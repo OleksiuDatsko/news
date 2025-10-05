@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from middleware.auth_middleware import admin_token_required
-from repositories import get_admin_repo
+from repositories import get_user_repo
 from services.auth.admin import AdminAuthService as AuthService
 
 auth_bp = Blueprint("auth", __name__)
@@ -16,7 +16,7 @@ def register():
     if not data.get("password"):
         return jsonify({"msg": "Пароль є обов'язковим"}), 400
 
-    admin_repo = get_admin_repo()
+    admin_repo = get_user_repo()
     auth_service = AuthService(admin_repo)
 
     try:
@@ -32,7 +32,7 @@ def register():
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
-    admin_repo = get_admin_repo()
+    admin_repo = get_user_repo()
     auth_service = AuthService(admin_repo)
 
     try:
@@ -45,7 +45,7 @@ def login():
 @auth_bp.route("/refresh", methods=["POST"])
 def refresh():
     data = request.get_json()
-    admin_repo = get_admin_repo()
+    admin_repo = get_user_repo()
     auth_service = AuthService(admin_repo)
 
     try:

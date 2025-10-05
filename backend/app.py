@@ -5,7 +5,7 @@ from database import IDatabaseConnection
 from flask import Flask, current_app, g
 from flask_jwt_extended import JWTManager
 from di.container import configure_dependencies
-from blueprints import auth_bp, subscription_bp, article_bp, admin_bp
+from blueprints import auth_bp, subscription_bp, article_bp, admin_bp, ad_bp
 from config import config
 
 load_dotenv()
@@ -38,6 +38,7 @@ def create_app(config_name="default"):
     app.register_blueprint(subscription_bp, url_prefix="/subscriptions")
     app.register_blueprint(article_bp, url_prefix="/articles")
     app.register_blueprint(admin_bp, url_prefix="/admin")
+    app.register_blueprint(ad_bp, url_prefix="/ads")
 
     @app.route("/")
     def hello():

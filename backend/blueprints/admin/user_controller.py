@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from middleware.auth_middleware import admin_token_required
-from repositories import get_admin_repo, get_subscription_repo
+from repositories import get_user_repo, get_subscription_repo
 from services.subscribtion_service import SubscriptionService
 
 user_bp = Blueprint("user", __name__)
@@ -14,7 +14,7 @@ def get_all_users(current_admin):
     per_page = request.args.get("per_page", 10, type=int)
 
     try:
-        user_repo = get_admin_repo()
+        user_repo = get_user_repo()
         users = user_repo.get_all()
 
         # Простий варіант пагінації
@@ -43,7 +43,7 @@ def get_all_users(current_admin):
 def get_user(current_admin, user_id):
     """Отримує користувача за ID"""
     try:
-        user_repo = get_admin_repo()
+        user_repo = get_user_repo()
         user = user_repo.get_by(id=user_id)
         if not user:
             return jsonify({"msg": "Користувача не знайдено"}), 404
@@ -69,7 +69,7 @@ def update_user(current_admin, user_id):
     data = request.get_json()
 
     try:
-        user_repo = get_admin_repo()
+        user_repo = get_user_repo()
         user = user_repo.get_by(id=user_id)
         if not user:
             return jsonify({"msg": "Користувача не знайдено"}), 404
@@ -99,7 +99,7 @@ def update_user(current_admin, user_id):
 def delete_user(current_admin, user_id):
     """Видаляє користувача"""
     try:
-        user_repo = get_admin_repo()
+        user_repo = get_user_repo()
         user = user_repo.get_by(id=user_id)
         if not user:
             return jsonify({"msg": "Користувача не знайдено"}), 404
@@ -120,7 +120,7 @@ def update_user_subscription(current_admin, user_id):
         return jsonify({"msg": "ID плану є обов'язковим"}), 400
 
     try:
-        user_repo = get_admin_repo()
+        user_repo = get_user_repo()
         user = user_repo.get_by(id=user_id)
         if not user:
             return jsonify({"msg": "Користувача не знайдено"}), 404
@@ -145,7 +145,7 @@ def update_user_subscription(current_admin, user_id):
 def get_user_subscription_history(current_admin, user_id):
     """Отримує історію підписок користувача"""
     try:
-        user_repo = get_admin_repo()
+        user_repo = get_user_repo()
         user = user_repo.get_by(id=user_id)
         if not user:
             return jsonify({"msg": "Користувача не знайдено"}), 404

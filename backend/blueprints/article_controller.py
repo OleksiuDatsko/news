@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from middleware.ads_middleware import ads_injector
 from middleware.auth_middleware import (
     token_optional,
     token_required,
@@ -12,7 +13,8 @@ article_bp = Blueprint("article", __name__)
 
 @article_bp.route("/", methods=["GET"])
 @token_optional
-def get_articles(current_user):
+@ads_injector(ad_type="sidebar")
+def get_articles(current_user, ads=[]):
     """Отримує список статей"""
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
@@ -34,14 +36,15 @@ def get_articles(current_user):
             page=page, per_page=per_page, filters=filters
         )
         result = [article.to_dict(metadata=True) for article in articles]
-        return jsonify(result), 200
+        return jsonify({"articles": result, "ads": ads}), 200
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
 
 
 @article_bp.route("/<int:article_id>", methods=["GET"])
 @token_optional
-def get_article(current_user, article_id):
+@ads_injector(ad_type="banner")
+def get_article(current_user, ads, article_id):
     """Отримує статтю за ID"""
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
@@ -60,7 +63,7 @@ def get_article(current_user, article_id):
                 jsonify({"msg": "Недостатньо прав для доступу до цього ресурсу"}),
                 403,
             )
-        return jsonify(article), 200
+        return jsonify({**article, "ads": ads}), 200
     except ValueError as e:
         return jsonify({"msg": str(e)}), 404
 

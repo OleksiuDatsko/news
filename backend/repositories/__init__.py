@@ -2,7 +2,7 @@ from flask import g
 from database import IDatabaseConnection
 
 
-def get_admin_repo():
+def get_user_repo():
     """Повертає екземпляр UserRepository"""
     db_conn: IDatabaseConnection = g.container.resolve(IDatabaseConnection)
     session = db_conn.get_session()
@@ -63,3 +63,12 @@ def get_ad_repo():
     from repositories.ad import AdRepository
 
     return AdRepository(session)
+
+
+def get_ad_view_repo():
+    """Повертає екземпляр AdViewRepository"""
+    db_conn: IDatabaseConnection = g.container.resolve(IDatabaseConnection)
+    session = db_conn.get_session()
+    from repositories.ad_view import AdViewRepository
+
+    return AdViewRepository(session)
