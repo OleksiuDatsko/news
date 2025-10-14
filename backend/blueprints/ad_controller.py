@@ -11,6 +11,7 @@ ad_bp = Blueprint("ad_public", __name__)
 def get_ads(current_user):
     ad_type = request.args.get("type")
     limit = request.args.get("limit", 5, type=int)
+    strategy = request.args.get("strategy", "default")
 
     ad_repo = get_ad_repo()
     ad_service = AdService(ad_repo)
@@ -20,7 +21,10 @@ def get_ads(current_user):
 
     try:
         ads = ad_service.get_ads_for_user(
-            ad_type=ad_type, user_permissions=user_permissions, limit=limit
+            ad_type=ad_type,
+            user_permissions=user_permissions,
+            limit=limit,
+            strategy=strategy,
         )
 
         result = [ad.to_dict() for ad in ads]
@@ -72,6 +76,7 @@ def get_ads_by_placement(current_user):
     user_permissions = current_user.permissions if current_user else {}
 
     requested = request.args.get("placement")
+    strategy = request.args.get("strategy", "default")
     if requested:
         placements = [p.strip() for p in requested.split(",") if p.strip()]
         allowed = {"banner", "sidebar", "popup", "inline", "video"}
@@ -82,9 +87,12 @@ def get_ads_by_placement(current_user):
         placements = ["banner", "sidebar", "popup", "inline", "video"]
 
     try:
+        print("Requested placements:", placements)
+        print("Using strategy:", strategy)
         ads = ad_service.get_ads_by_placement(
             user_permissions=user_permissions,
             placements=placements,
+            strategy=strategy,
         )
 
         result = {

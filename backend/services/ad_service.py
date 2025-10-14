@@ -2,12 +2,27 @@
 from datetime import datetime
 from typing import List, Optional, Dict
 from sqlalchemy.orm import Session
+from services.ad_strategy import (
+    AdSelectionStrategy,
+    DefaultAdStrategy,
+    RotationAdStrategy,
+    RandomAdStrategy,
+)
 from repositories.ad import AdRepository
 
 
 class AdService:
     def __init__(self, ad_repo: AdRepository):
         self.ad_repo = ad_repo
+        self.strategies: Dict[str, AdSelectionStrategy] = {
+            "default": DefaultAdStrategy(),
+            "rotation": RotationAdStrategy(),
+            "random": RandomAdStrategy(),
+        }
+
+    def _get_strategy(self, strategy_name: Optional[str] = "default"):
+        """Повертає екземпляр стратегії за назвою."""
+        return self.strategies.get(strategy_name, self.strategies["default"])
 
     def should_show_ads(self, user_permissions: dict) -> bool:
         return not user_permissions.get("no_ads", False)
@@ -17,15 +32,14 @@ class AdService:
         ad_type: Optional[str] = None,
         user_permissions: Optional[dict] = None,
         limit: int = 5,
+        strategy: str = "default",
     ) -> List:
         if user_permissions and not self.should_show_ads(user_permissions):
             return []
 
-        # Отримуємо активні реклами
         current_time = datetime.now()
         ads = self.ad_repo.get_all()
 
-        # Фільтруємо активні реклами
         active_ads = [
             ad
             for ad in ads
@@ -34,26 +48,33 @@ class AdService:
             and (not ad.end_date or ad.end_date >= current_time)
         ]
 
-        # Фільтруємо за типом якщо вказано
         if ad_type:
             active_ads = [ad for ad in active_ads if ad.ad_type == ad_type]
 
-        # Обмежуємо кількість
-        return active_ads[:limit]
+        selection_strategy = self._get_strategy(strategy)
+        selected_ads = selection_strategy.select_ads(active_ads, limit)
+
+        return selected_ads
 
     def get_ads_by_placement(
         self,
         user_permissions: Optional[dict] = None,
         placements: List[str] = ["banner", "sidebar", "popup", "inline", "video"],
+        strategy: str = "default",
     ) -> Dict[str, List]:
         if user_permissions and not self.should_show_ads(user_permissions):
-            return {"banner": [], "sidebar": [], "popup": [], "inline": [], "video": []}
+            return {
+                p: [] for p in placements
+            }  # Повертаємо порожні списки для всіх плейсментів
 
         result = {}
 
         for ad_type in placements:
             result[ad_type] = self.get_ads_for_user(
-                ad_type=ad_type, user_permissions=user_permissions, limit=3
+                ad_type=ad_type,
+                user_permissions=user_permissions,
+                limit=3,
+                strategy=strategy,
             )
 
         return result
