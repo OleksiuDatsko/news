@@ -72,3 +72,12 @@ def get_ad_view_repo():
     from repositories.ad_view import AdViewRepository
 
     return AdViewRepository(session)
+
+
+def get_comment_repo():
+    """Повертає екземпляр CommentRepository"""
+    db_conn = g.container.resolve(IDatabaseConnection)
+    session = db_conn.get_session()
+    from repositories.comment import CommentRepository
+
+    return CommentRepository(session)

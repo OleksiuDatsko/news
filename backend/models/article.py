@@ -97,6 +97,20 @@ class Comment(BaseModel):
     article = relationship("Article", back_populates="comments")
     user = relationship("User", back_populates="comments")
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "article_id": self.article_id,
+            "user": (
+                {"id": self.user.id, "username": self.user.username}
+                if self.user
+                else None
+            ),
+            "text": self.text,
+            "status": self.status,
+            "created_at": self.created_at.isoformat(),
+        }
+
 
 class ArticleInteraction(BaseModel):
     __tablename__ = "article_interactions"
