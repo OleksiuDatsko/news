@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import os
+from flask_cors import CORS
 from flask_migrate import Migrate
 from database import IDatabaseConnection
 from flask import Flask, current_app, g
@@ -20,6 +21,7 @@ load_dotenv()
 
 def create_app(config_name="default"):
     app = Flask(__name__)
+    CORS(app, origins="*", supports_credentials=True)
 
     config_class = config.get(config_name, config["default"])
     app.config.from_object(config_class)

@@ -1,4 +1,5 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, make_response, request, jsonify
+from flask_jwt_extended import get_jwt_identity, jwt_required, set_access_cookies, set_refresh_cookies
 from middleware.auth_middleware import admin_token_required
 from repositories import get_admin_repo
 from services.auth.admin import AdminAuthService as AuthService
@@ -37,22 +38,31 @@ def login():
 
     try:
         result = auth_service.authenticate(data.get("email"), data.get("password"))
-        return jsonify(result), 200
+        response = make_response(jsonify({"admin": result["admin"]}))
+
+        set_access_cookies(response, result["tokens"]["access_token"])
+        set_refresh_cookies(response, result["tokens"]["refresh_token"])
+
+        return response, 200
     except ValueError as e:
         return jsonify({"msg": str(e)}), 401
 
 
 @auth_bp.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)
 def refresh():
-    data = request.get_json()
+    current_admin_id = get_jwt_identity()
     admin_repo = get_admin_repo()
     auth_service = AuthService(admin_repo)
+    admin = auth_service.get_current_admin(current_admin_id)
 
-    try:
-        result = auth_service.refresh(data.get("refresh_token"))
-        return jsonify(result), 200
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 401
+    new_tokens = auth_service.refresh(admin)
+
+    response = make_response(jsonify({"msg": "Токен успішно оновлено"}))
+    
+    set_access_cookies(response, new_tokens["tokens"]["access_token"])
+
+    return response, 200
 
 
 @auth_bp.route("/me", methods=["GET"])

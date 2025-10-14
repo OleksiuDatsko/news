@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -14,8 +15,10 @@ class Config:
 
     # JWT settings
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "jwt-secret-string")
-    JWT_ACCESS_TOKEN_EXPIRES = 3600
-
+    JWT_TOKEN_LOCATION = ["cookies", "headers"]
+    JWT_COOKIE_CSRF_PROTECT = False
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
 class DefaultConfig(Config):
     DEBUG = True

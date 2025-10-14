@@ -52,30 +52,13 @@ class AdminAuthService(AuthStrategy):
         tokens = token_producer.create_tokens_for_admin(admin)
         return {
             "tokens": tokens,
-            "admin": {
-                "id": admin.id,
-                "email": admin.email,
-            },
+            "admin": admin.to_dict(),
         }
 
-    def refresh(self, refresh_token: str) -> dict:
+    def refresh(self, user: str) -> dict:
         """Існуючий метод для оновлення токена"""
-        try:
-            decoded = decode_token(refresh_token)
-        except Exception as e:
-            raise ValueError("Невірний refresh token") from e
-
-        if decoded.get("type") != "refresh":
-            raise ValueError("Переданий не refresh token")
-
-        identity = decoded.get("sub")
-        admin = self.admin_repo.get_by(id=identity)
-        if not identity:
-            raise ValueError("Не вдалося отримати дані користувача з токена")
-
         token_producer = TokenFactoryProducer()
-        tokens = token_producer.create_tokens_for_admin(admin)
-
+        tokens = token_producer.create_tokens_for_admin(user)
         return {"tokens": tokens}
 
     def get_current_admin(self, admin_id: int):
