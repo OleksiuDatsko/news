@@ -1,6 +1,5 @@
-import { error } from '@sveltejs/kit';
+type FetchFn = typeof fetch;
 
-// Використовуємо глобальний fetch, оскільки ми в SPA-режимі
 const handleResponse = async (response: Response) => {
 	if (response.ok) {
 		if (response.status === 204) {
@@ -26,7 +25,12 @@ const handleResponse = async (response: Response) => {
 	throw apiError;
 };
 
-const request = async <T>(method: string, url: string, data?: unknown): Promise<T> => {
+const request = async <T>(
+	method: string,
+	url: string,
+	data?: unknown,
+	customFetch?: FetchFn
+): Promise<T> => {
 	const options: RequestInit = {
 		method,
 		credentials: 'include',
@@ -34,18 +38,25 @@ const request = async <T>(method: string, url: string, data?: unknown): Promise<
 	};
 
 	if (data) {
-		options.headers = {'Content-type': 'application/json'};
+		options.headers = { 'Content-type': 'application/json' };
 		options.body = JSON.stringify(data);
 	}
 
-	const response = await fetch(`/api${url}`, options);
+	const fetchFn = customFetch || fetch;
+
+	const baseUrl = "/api";
+
+	const fullUrl = `${baseUrl}${url}`;
+
+	const response = await fetchFn(fullUrl, options);
 	return handleResponse(response);
 };
 
-// Експортуємо простий об'єкт з методами
 export const api = {
-	get: <T>(url: string) => request<T>('GET', url),
-	post: <T>(url: string, data: unknown) => request<T>('POST', url, data),
-	put: <T>(url: string, data: unknown) => request<T>('PUT', url, data),
-	del: <T>(url: string) => request<T>('DELETE', url)
+	get: <T>(url: string, customFetch?: FetchFn) => request<T>('GET', url, undefined, customFetch),
+	post: <T>(url: string, data: unknown, customFetch?: FetchFn) =>
+		request<T>('POST', url, data, customFetch),
+	put: <T>(url: string, data: unknown, customFetch?: FetchFn) =>
+		request<T>('PUT', url, data, customFetch),
+	del: <T>(url: string, customFetch?: FetchFn) => request<T>('DELETE', url, undefined, customFetch)
 };
