@@ -1,5 +1,5 @@
 from flask import Blueprint, make_response, request, jsonify
-from flask_jwt_extended import get_jwt_identity, jwt_required, set_access_cookies, set_refresh_cookies
+from flask_jwt_extended import get_jwt_identity, jwt_required, set_access_cookies, set_refresh_cookies, unset_jwt_cookies
 from middleware.auth_middleware import admin_token_required
 from repositories import get_admin_repo
 from services.auth.admin import AdminAuthService as AuthService
@@ -64,6 +64,11 @@ def refresh():
 
     return response, 200
 
+@auth_bp.route("/logout", methods=["POST"])
+def logout():
+    response = make_response(jsonify({"msg": "Успішний вихід"}))
+    unset_jwt_cookies(response)
+    return response, 200
 
 @auth_bp.route("/me", methods=["GET"])
 @admin_token_required

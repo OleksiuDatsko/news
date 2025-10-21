@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, make_response, render_template
 from repositories import get_user_repo
 from services.auth.user import UserAuthService as AuthService
 from flask_jwt_extended import (
+    get_jwt,
     set_access_cookies,
     set_refresh_cookies,
     unset_jwt_cookies,
@@ -85,6 +86,9 @@ def refresh():
 @jwt_required()
 def me():
     current_user_id = get_jwt_identity()
+    jwt = get_jwt()
+    if jwt.get("type") != "user":
+        return jsonify({"msg": "Ти маєш бути користувачем"}), 418
     user_repo = get_user_repo()
     auth_service = AuthService(user_repo)
     current_user = auth_service.get_current_user(current_user_id)
