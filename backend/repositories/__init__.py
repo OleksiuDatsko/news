@@ -1,83 +1,37 @@
 from flask import g
-from database import IDatabaseConnection
+from repositories.ad import AdRepository
+from repositories.ad_view import AdViewRepository
+from repositories.admin import AdminRepository
+from repositories.article import ArticleRepository
+from repositories.author import AuthorRepository
+from repositories.category import CategoryRepository
+from repositories.comment import CommentRepository
+from repositories.subscription import SubscriptionRepository
+from repositories.user import UserRepository
 
+def get_ad_repo() -> AdRepository:
+    return AdRepository(g.db_session)
 
-def get_user_repo():
-    """Повертає екземпляр UserRepository"""
-    db_conn: IDatabaseConnection = g.container.resolve(IDatabaseConnection)
-    session = db_conn.get_session()
-    from repositories.user import UserRepository
+def get_ad_view_repo() -> AdViewRepository:
+    return AdViewRepository(g.db_session)
 
-    return UserRepository(session)
+def get_admin_repo() -> AdminRepository:
+    return AdminRepository(g.db_session)
 
+def get_article_repo() -> ArticleRepository:
+    return ArticleRepository(g.db_session)
 
-def get_subscription_repo():
-    """Повертає екземпляр SubscriptionRepository"""
-    db_conn: IDatabaseConnection = g.container.resolve(IDatabaseConnection)
-    session = db_conn.get_session()
-    from repositories.subscription import SubscriptionRepository
+def get_author_repo() -> AuthorRepository:
+    return AuthorRepository(g.db_session)
 
-    return SubscriptionRepository(session)
+def get_category_repo() -> CategoryRepository:
+    return CategoryRepository(g.db_session)
 
+def get_comment_repo() -> CommentRepository:
+    return CommentRepository(g.db_session)
 
-def get_article_repo():
-    """Повертає екземпляр ArticleRepository"""
-    db_conn: IDatabaseConnection = g.container.resolve(IDatabaseConnection)
-    session = db_conn.get_session()
-    from repositories.article import ArticleRepository
+def get_subscription_repo() -> SubscriptionRepository:
+    return SubscriptionRepository(g.db_session)
 
-    return ArticleRepository(session)
-
-
-def get_admin_repo():
-    """Повертає екземпляр AdminRepository"""
-    db_conn: IDatabaseConnection = g.container.resolve(IDatabaseConnection)
-    session = db_conn.get_session()
-    from repositories.admin import AdminRepository
-
-    return AdminRepository(session)
-
-
-def get_category_repo():
-    """Повертає екземпляр CategoryRepository"""
-    db_conn: IDatabaseConnection = g.container.resolve(IDatabaseConnection)
-    session = db_conn.get_session()
-    from repositories.category import CategoryRepository
-
-    return CategoryRepository(session)
-
-
-def get_author_repo():
-    """Повертає екземпляр AuthorRepository"""
-    db_conn: IDatabaseConnection = g.container.resolve(IDatabaseConnection)
-    session = db_conn.get_session()
-    from repositories.author import AuthorRepository
-
-    return AuthorRepository(session)
-
-
-def get_ad_repo():
-    """Повертає екземпляр AdRepository"""
-    db_conn: IDatabaseConnection = g.container.resolve(IDatabaseConnection)
-    session = db_conn.get_session()
-    from repositories.ad import AdRepository
-
-    return AdRepository(session)
-
-
-def get_ad_view_repo():
-    """Повертає екземпляр AdViewRepository"""
-    db_conn: IDatabaseConnection = g.container.resolve(IDatabaseConnection)
-    session = db_conn.get_session()
-    from repositories.ad_view import AdViewRepository
-
-    return AdViewRepository(session)
-
-
-def get_comment_repo():
-    """Повертає екземпляр CommentRepository"""
-    db_conn = g.container.resolve(IDatabaseConnection)
-    session = db_conn.get_session()
-    from repositories.comment import CommentRepository
-
-    return CommentRepository(session)
+def get_user_repo() -> UserRepository:
+    return UserRepository(g.db_session)

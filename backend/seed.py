@@ -268,6 +268,7 @@ def seed_database():
                 """,
                 "status": "published",
                 "is_exclusive": True,
+                "is_breaking": True,
                 "views_count": 2800,
             }
         )

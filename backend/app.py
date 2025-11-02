@@ -26,10 +26,26 @@ def create_app(config_name="default"):
     config_class = config.get(config_name, config["default"])
     app.config.from_object(config_class)
     app.config["SQLALCHEMY_ECHO"] = False
-
+    
     @app.before_request
-    def attach_container():
+    def attach_services():
+        """
+        Виконується перед кожним запитом.
+        Створює ОДНУ сесію на весь запит і зберігає її в 'g'.
+        """
         g.container = current_app.container
+        db_connection = g.container.resolve(IDatabaseConnection)
+        g.db_session = db_connection.get_session()
+
+    @app.teardown_request
+    def teardown_session(exception=None):
+        """
+        Виконується після кожного запиту.
+        Закриває сесію і повертає з'єднання в пул.
+        """
+        db_session = g.pop('db_session', None)
+        if db_session is not None:
+            db_session.close()
 
     jwt = JWTManager()
     jwt.init_app(app)
@@ -60,4 +76,4 @@ def create_app(config_name="default"):
 if __name__ == "__main__":
     config_name = os.environ.get("FLASK_CONFIG", "default")
     app = create_app(config_name)
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, threaded=True)
