@@ -25,7 +25,7 @@ def get_articles(current_user, ads=[]):
         filters["status"] = status
     if category_id:
         filters["category_id"] = category_id
-    if current_user and not current_user.permissions.get("exclusive_content", False):
+    if not getattr(current_user, "permissions", {}).get("exclusive_content", False):
         filters["is_exclusive"] = False
 
     article_repo = get_article_repo()
@@ -119,12 +119,15 @@ def get_saved_articles(current_user):
     """Отримує збережені статті користувача"""
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
-
+    get_all_ids = request.args.get("ids", False, type=bool)
+    
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
 
     try:
         articles = article_service.get_saved_articles(current_user.id, page, per_page)
+        if get_all_ids:
+            articles = [article.get("id") for article in articles]
         return jsonify(articles), 200
     except Exception as e:
         return jsonify({"msg": str(e)}), 500

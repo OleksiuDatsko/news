@@ -9,4 +9,5 @@ export interface IUser {
     comment: boolean;
   };
   created_at: string;
+  savedArticles?: number[];
 }
