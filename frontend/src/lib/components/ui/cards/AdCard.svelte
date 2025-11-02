@@ -6,7 +6,7 @@
 </script>
 
 <div
-	class="relative flex flex-col bg-white rounded-lg shadow-md overflow-hidden border border-gray-100"
+	class="relative flex flex-col bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 max-w-sm"
 >
 	<span class="absolute top-2 right-2 text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-0.5 rounded">
 		Реклама

@@ -122,7 +122,9 @@ def seed_database():
             }
         )
         print("Користувачів створено.")
-        print(f"\tПароль для користувачів: {generic_user_password}\n\tEmails: free@news.com, premium@news.com")
+        print(
+            f"\tПароль для користувачів: {generic_user_password}\n\tEmails: free@news.com, premium@news.com"
+        )
 
         # --- 4. Призначення підписок ---
         sub_repo.subscribe_user(user_id=premium_user.id, plan_id=premium_plan.id)
@@ -192,7 +194,7 @@ def seed_database():
 
         # --- 6. Створення статей ---
         print("Створення статей...")
-        
+
         # --- ВЕЛИКА СТАТТЯ 1 ---
         article1 = article_repo.create(
             {
@@ -231,7 +233,7 @@ def seed_database():
                 "views_count": 1520,
             }
         )
-        
+
         # --- ВЕЛИКА СТАТТЯ 2 ---
         article2 = article_repo.create(
             {
@@ -336,7 +338,7 @@ def seed_database():
                 "views_count": 750,
             }
         )
-        
+
         # --- ВЕЛИКА СТАТТЯ 3 ---
         article7 = article_repo.create(
             {
@@ -366,7 +368,7 @@ def seed_database():
                 "views_count": 1900,
             }
         )
-        
+
         # --- ВЕЛИКА СТАТТЯ 4 ---
         article8 = article_repo.create(
             {
@@ -599,7 +601,7 @@ def seed_database():
                 "title": "Юридичні послуги 'Право'",
                 "content": "Професійна консультація для вашого бізнесу. Відкриття ФОП.",
                 "ad_type": "sidebar",
-                "is_active": False,
+                "is_active": False,  # Неактивна реклама для тестування
                 "impressions_count": 2000,
                 "clicks_count": 15,
             }
@@ -625,8 +627,160 @@ def seed_database():
             }
         )
 
-        print("Рекламні оголошення створено.")
+        # --- Додаткові оголошення ---
 
+        ad_repo.create(
+            {
+                "title": "Книгарня 'Літера'",
+                "content": "Нові надходження світових бестселерів. Замовляйте онлайн.",
+                "ad_type": "banner",
+                "is_active": True,
+                "impressions_count": 8500,
+                "clicks_count": 310,
+            }
+        )
+        ad_repo.create(
+            {
+                "title": "Вебінар з маркетингу",
+                "content": "Дізнайтеся, як просувати свій бренд у 2025 році. Реєстрація відкрита.",
+                "ad_type": "sidebar",
+                "is_active": True,
+                "impressions_count": 6200,
+                "clicks_count": 420,
+            }
+        )
+        ad_repo.create(
+            {
+                "title": "Кава 'Gourmet Beans'",
+                "content": "Свіжообсмажена арабіка з доставкою додому.",
+                "ad_type": "inline",
+                "is_active": True,
+                "impressions_count": 4300,
+                "clicks_count": 130,
+            }
+        )
+        ad_repo.create(
+            {
+                "title": "Новий ігровий монітор 'ViewMax'",
+                "content": "4K, 144Hz. Повне занурення у гру.",
+                "ad_type": "video",
+                "is_active": True,
+                "impressions_count": 16000,
+                "clicks_count": 880,
+            }
+        )
+        ad_repo.create(
+            {
+                "title": "Підпишіться на нашу розсилку!",
+                "content": "Отримуйте ексклюзивні статті та знижки першими.",
+                "ad_type": "popup",
+                "is_active": True,
+                "impressions_count": 10000,
+                "clicks_count": 1500,
+            }
+        )
+        ad_repo.create(
+            {
+                "title": "Еко-товари 'Zeleno'",
+                "content": "Все для свідомого споживання: від косметики до побутової хімії.",
+                "ad_type": "sidebar",
+                "is_active": True,
+                "impressions_count": 7100,
+                "clicks_count": 190,
+            }
+        )
+        ad_repo.create(
+            {
+                "title": "Ветеринарна клініка 'ДоброЛап'",
+                "content": "Цілодобова допомога вашим улюбленцям. Консультація онлайн.",
+                "ad_type": "banner",
+                "is_active": True,
+                "impressions_count": 3900,
+                "clicks_count": 120,
+            }
+        )
+        ad_repo.create(
+            {
+                "title": "Йога-студія 'Гармонія'",
+                "content": "Знайдіть свій внутрішній баланс. Пробне заняття – 100 грн.",
+                "ad_type": "inline",
+                "is_active": True,
+                "impressions_count": 5100,
+                "clicks_count": 220,
+            }
+        )
+        ad_repo.create(
+            {
+                "title": "Хмарне сховище 'CloudDrive'",
+                "content": "Надійне зберігання ваших файлів. 1ТБ за 99 грн/міс.",
+                "ad_type": "sidebar",
+                "is_active": True,
+                "impressions_count": 13000,
+                "clicks_count": 410,
+            }
+        )
+        ad_repo.create(
+            {
+                "title": "Новий альбом гурту 'Stray'",
+                "content": "Слухайте на всіх стрімінгових платформах!",
+                "ad_type": "video",
+                "is_active": True,
+                "impressions_count": 22000,
+                "clicks_count": 1100,
+            }
+        )
+        ad_repo.create(
+            {
+                "title": "Дитячі іграшки 'Joy'",
+                "content": "Розвиваючі ігри для дітей будь-якого віку.",
+                "ad_type": "banner",
+                "is_active": True,
+                "impressions_count": 6800,
+                "clicks_count": 160,
+            }
+        )
+        ad_repo.create(
+            {
+                "title": "Зимові шини 'NordTire'",
+                "content": "Готуйте авто до зими! Знижки на монтаж.",
+                "ad_type": "banner",
+                "is_active": False,  # Ще одна неактивна
+                "impressions_count": 4000,
+                "clicks_count": 50,
+            }
+        )
+        ad_repo.create(
+            {
+                "title": "Курси фотографії",
+                "content": "Навчіться робити професійні знімки на свій смартфон.",
+                "ad_type": "inline",
+                "is_active": True,
+                "impressions_count": 5300,
+                "clicks_count": 300,
+            }
+        )
+        ad_repo.create(
+            {
+                "title": "Оренда офісів 'WorkSpace'",
+                "content": "Сучасні офісні рішення для вашого бізнесу. Від $200/міс.",
+                "ad_type": "sidebar",
+                "is_active": True,
+                "impressions_count": 9100,
+                "clicks_count": 230,
+            }
+        )
+        ad_repo.create(
+            {
+                "title": "Зубна клініка 'Smile'",
+                "content": "Професійна чистка зубів зі знижкою 20%.",
+                "ad_type": "popup",
+                "is_active": True,
+                "impressions_count": 2800,
+                "clicks_count": 350,
+            }
+        )
+
+        print("Рекламні оголошення створено.")
         db_session.close()
 
 

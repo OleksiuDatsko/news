@@ -70,14 +70,32 @@
     >
         <div class="bg-white rounded-lg shadow-lg p-6 md:p-10">
             <header class="border-b border-gray-200 pb-6 mb-6">
-                {#if article.category}
-                    <a
-                        href="/category/{article.category.name.toLowerCase()}"
-                        class="font-semibold text-indigo-600 hover:underline uppercase text-sm"
-                    >
-                        {article.category.name}
-                    </a>
-                {/if}
+                <div class="flex flex-row items-center justify-between">
+                    {#if article.category}
+                        <a
+                            href="/category/{article.category.name.toLowerCase()}"
+                            class="font-semibold text-indigo-600 hover:underline uppercase text-sm"
+                        >
+                            {article.category.name}
+                        </a>
+                    {/if}
+                    <div>
+                        {#if article.is_breaking}
+                            <span
+                                class="ml-4 inline-block bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded-full"
+                            >
+                                Терміново
+                            </span>
+                        {/if}
+                        {#if article.is_exclusive}
+                            <span
+                                class="ml-2 inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold px-2 py-1 rounded-full"
+                            >
+                                Ексклюзив
+                            </span>
+                        {/if}
+                    </div>
+                </div>
 
                 <div class="flex justify-between items-start gap-4 mt-3 mb-5">
                     <h1 class="text-3xl md:text-5xl font-bold text-gray-900">

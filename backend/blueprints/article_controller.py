@@ -54,11 +54,7 @@ def get_article(current_user, ads, article_id):
             article = article_service.get_article_by_id(article_id, current_user.id)
         else:
             article = article_service.get_article_by_id(article_id)
-        if (
-            current_user
-            and not current_user.permissions.get("exclusive_content", False)
-            and article.get("is_exclusive", False)
-        ):
+        if not getattr(current_user, "permissions", {}).get("exclusive_content", False) and article.get("is_exclusive", False):
             return (
                 jsonify({"msg": "Недостатньо прав для доступу до цього ресурсу"}),
                 403,
@@ -120,7 +116,7 @@ def get_saved_articles(current_user):
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
     get_all_ids = request.args.get("ids", False, type=bool)
-    
+
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
 

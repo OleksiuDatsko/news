@@ -111,12 +111,16 @@
 
 		<h2 class="text-2xl font-bold mb-3 text-gray-900 leading-tight">
 			<a
-				href="/article/{article.id}"
+				href="/articles/{article.id}"
 				class="hover:text-indigo-600 transition-colors duration-200"
 			>
 				{article.title}
 			</a>
 		</h2>
+
+		<p>
+			{article.keywords.join(", ")}
+		</p>
 
 		<div
 			class="text-sm text-gray-500 flex flex-wrap items-center gap-x-3 gap-y-1"

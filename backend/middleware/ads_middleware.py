@@ -3,7 +3,7 @@ from repositories import get_ad_repo
 from services.ad_service import AdService
 
 
-def ads_injector(ad_type: str = None, limit=3, strategy="default"):
+def ads_injector(ad_type: str = None, limit=3, strategy="random"):
     """
     Декоратор, що інжектить рекламу обраного типу в параметри функції-обробника.
     ["banner", "sidebar", "popup", "inline", "video"]

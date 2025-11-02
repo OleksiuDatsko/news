@@ -65,7 +65,7 @@
 				{:else if $adminStore}
 					<span class="text-sm text-gray-600 hidden sm:block">
 						Admin:
-						<a href="/admin/dashboard" class="font-medium text-gray-900 hover:underline">
+						<a href="/_/dashboard" class="font-medium text-gray-900 hover:underline">
 							Dashboard
 						</a>
 					</span>
