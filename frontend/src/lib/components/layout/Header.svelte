@@ -1,18 +1,21 @@
 <script lang="ts">
-	import { adminStore, userStore } from '$lib/stores/authStore';
-	import { api } from '$lib/services/api';
-	import { goto } from '$app/navigation';
+	import { adminStore, userStore } from "$lib/stores/authStore";
+	import { categoryStore } from "$lib/stores/categoryStore";
+	import { api } from "$lib/services/api";
+	import { goto } from "$app/navigation";
 
 	async function handleLogout() {
 		if ($userStore) {
-			await api.post('/auth/logout', {});
+			await api.post("/auth/logout", {});
 			userStore.set(null);
 		} else if ($adminStore) {
-			await api.post('/admin/auth/logout', {});
+			await api.post("/admin/auth/logout", {});
 			adminStore.set(null);
 		}
-		await goto('/');
+		await goto("/");
 	}
+
+	let topCategories = $derived($categoryStore.slice(0, 3));
 </script>
 
 <header class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
@@ -24,27 +27,22 @@
 				</a>
 
 				<div class="hidden md:flex gap-5">
-					<a href="/" class="text-sm font-medium text-gray-700 hover:text-indigo-600">
+					<a
+						href="/"
+						class="text-sm font-medium text-gray-700 hover:text-indigo-600"
+					>
 						Головна
 					</a>
-					<a
-						href="/categories/politika"
-						class="text-sm font-medium text-gray-700 hover:text-indigo-600"
-					>
-						Політика
-					</a>
-					<a
-						href="/categories/sport"
-						class="text-sm font-medium text-gray-700 hover:text-indigo-600"
-					>
-						Спорт
-					</a>
-					<a
-						href="/categories/tehnologii"
-						class="text-sm font-medium text-gray-700 hover:text-indigo-600"
-					>
-						Технології
-					</a>
+					{#if topCategories.length > 0}
+						{#each topCategories as category (category.id)}
+							<a
+								href="/categories/{category.slug}"
+								class="text-sm font-medium text-gray-700 hover:text-indigo-600"
+							>
+								{category.name}
+							</a>
+						{/each}
+					{/if}
 				</div>
 			</div>
 
@@ -52,7 +50,10 @@
 				{#if $userStore}
 					<span class="text-sm text-gray-600 hidden sm:block">
 						Вітаємо,
-						<a href="/profile" class="font-medium text-gray-900 hover:underline">
+						<a
+							href="/profile"
+							class="font-medium text-gray-900 hover:underline"
+						>
 							{$userStore.username}
 						</a>
 					</span>
@@ -65,7 +66,10 @@
 				{:else if $adminStore}
 					<span class="text-sm text-gray-600 hidden sm:block">
 						Admin:
-						<a href="/_/dashboard" class="font-medium text-gray-900 hover:underline">
+						<a
+							href="/_/dashboard"
+							class="font-medium text-gray-900 hover:underline"
+						>
 							Dashboard
 						</a>
 					</span>
