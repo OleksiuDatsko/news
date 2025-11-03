@@ -3,6 +3,7 @@
     import { userStore } from "$lib/stores/authStore";
     import { api } from "$lib/services/api";
     import AdCard from "$lib/components/ui/cards/AdCard.svelte";
+    import CommentList from "$lib/components/comments/CommentList.svelte";
 
     let { data }: { data: PageData } = $props();
 
@@ -177,12 +178,9 @@
                 {@html article.content}
             </div>
 
-            <div class="mt-12 border-t pt-8">
-                <h2 class="text-2xl font-bold">Коментарі</h2>
-                <p class="text-gray-600 mt-4">
-                    Коментарі будуть доступні незабаром...
-                </p>
-            </div>
+            {#if article}
+                <CommentList articleId={article.id} />
+            {/if}
         </div>
 
         {#if data.ads && data.ads.length > 0}
