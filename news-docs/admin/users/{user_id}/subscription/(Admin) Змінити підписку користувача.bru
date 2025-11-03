@@ -1,0 +1,31 @@
+meta {
+  name: (Admin) Змінити підписку користувача
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{baseUrl}}/admin/users/:user_id/subscription
+  body: json
+  auth: apikey
+}
+
+params:path {
+  user_id: 
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}
+
+body:json {
+  {
+    "plan_id": 0
+  }
+}

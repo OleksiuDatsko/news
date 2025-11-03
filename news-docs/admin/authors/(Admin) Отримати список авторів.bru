@@ -1,0 +1,27 @@
+meta {
+  name: (Admin) Отримати список авторів
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/authors/
+  body: none
+  auth: apikey
+}
+
+params:query {
+  ~page: 
+  ~per_page: 
+  ~search: 
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}

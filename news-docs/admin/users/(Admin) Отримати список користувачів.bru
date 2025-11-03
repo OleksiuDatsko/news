@@ -1,0 +1,26 @@
+meta {
+  name: (Admin) Отримати список користувачів
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/users/
+  body: none
+  auth: apikey
+}
+
+params:query {
+  ~page: 
+  ~per_page: 
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}

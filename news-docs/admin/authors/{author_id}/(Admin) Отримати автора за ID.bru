@@ -1,0 +1,25 @@
+meta {
+  name: (Admin) Отримати автора за ID
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/authors/:author_id
+  body: none
+  auth: apikey
+}
+
+params:path {
+  author_id: 
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}

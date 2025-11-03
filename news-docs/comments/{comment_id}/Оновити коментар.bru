@@ -1,0 +1,31 @@
+meta {
+  name: Оновити коментар
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{baseUrl}}/comments/:comment_id
+  body: json
+  auth: apikey
+}
+
+params:path {
+  comment_id: 
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}
+
+body:json {
+  {
+    "text": ""
+  }
+}

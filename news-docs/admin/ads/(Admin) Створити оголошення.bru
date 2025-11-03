@@ -1,0 +1,32 @@
+meta {
+  name: (Admin) Створити оголошення
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/admin/ads/
+  body: json
+  auth: apikey
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}
+
+body:json {
+  {
+    "title": "",
+    "content": "",
+    "ad_type": "",
+    "is_active": false,
+    "start_date": "",
+    "end_date": ""
+  }
+}

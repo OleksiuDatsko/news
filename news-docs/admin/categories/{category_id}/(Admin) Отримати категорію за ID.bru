@@ -1,0 +1,25 @@
+meta {
+  name: (Admin) Отримати категорію за ID
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/categories/:category_id
+  body: none
+  auth: apikey
+}
+
+params:path {
+  category_id: 
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}

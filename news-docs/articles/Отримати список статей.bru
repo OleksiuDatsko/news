@@ -1,0 +1,18 @@
+meta {
+  name: Отримати список статей
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/articles/
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~page: 
+  ~per_page: 
+  ~status: 
+  ~category_slug: 
+}

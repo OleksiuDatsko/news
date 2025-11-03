@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "OleksiuDatsko News API",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

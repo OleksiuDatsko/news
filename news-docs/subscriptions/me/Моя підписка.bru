@@ -1,0 +1,21 @@
+meta {
+  name: Моя підписка
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/subscriptions/me
+  body: none
+  auth: apikey
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}

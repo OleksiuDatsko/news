@@ -1,0 +1,28 @@
+meta {
+  name: (Admin) Отримати всі статті
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/articles/
+  body: none
+  auth: apikey
+}
+
+params:query {
+  ~page: 
+  ~per_page: 
+  ~status: 
+  ~category: 
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}

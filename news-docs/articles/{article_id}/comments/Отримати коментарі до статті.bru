@@ -1,0 +1,15 @@
+meta {
+  name: Отримати коментарі до статті
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/articles/:article_id/comments
+  body: none
+  auth: inherit
+}
+
+params:path {
+  article_id: 
+}

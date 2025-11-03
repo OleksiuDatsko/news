@@ -1,0 +1,25 @@
+meta {
+  name: (Admin) Видалити адміністратора
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{baseUrl}}/admin/admin-users/:admin_id
+  body: none
+  auth: apikey
+}
+
+params:path {
+  admin_id: 
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}
