@@ -21,11 +21,11 @@
 	}
 
 	function handleCreateNew() {
-		goto("/admin/articles/new");
+		goto("/_/articles/new");
 	}
 
 	function handleEdit(articleId: number) {
-		goto(`/admin/articles/${articleId}`);
+		goto(`/_/articles/${articleId}`);
 	}
 
 	async function handleDelete(articleId: number) {

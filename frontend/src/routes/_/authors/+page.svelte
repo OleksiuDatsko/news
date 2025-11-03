@@ -34,7 +34,7 @@
 		loadingAction = true;
 		error = "";
 		try {
-			await api.del(`/admin/authors/${authorId}`);
+			await api.del(`/_/authors/${authorId}`);
 			authors = authors.filter((a) => a.id !== authorId);
 		} catch (e: any) {
 			error =
