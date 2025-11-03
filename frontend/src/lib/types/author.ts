@@ -3,5 +3,5 @@ export interface IAuthor {
 	first_name: string;
 	last_name: string;
 	bio: string | null;
-	articles_count?: number;
+	total_articles?: number;
 }

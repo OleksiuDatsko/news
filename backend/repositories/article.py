@@ -26,12 +26,14 @@ class ArticleRepository(BaseRepository):
                 query = query.join(Article.category).filter(Category.slug == filters["category_slug"])
 
         offset = (page - 1) * per_page
-        return (
+        total = query.count()
+        articles = (
             query.order_by(desc(Article.created_at))
             .offset(offset)
             .limit(per_page)
             .all()
-        )
+        ) 
+        return articles, total
 
     def save_article(self, user_id: int, article_id: int):
         """Зберігає статтю для користувача"""

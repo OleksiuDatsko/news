@@ -11,7 +11,7 @@ article_bp = Blueprint("article", __name__)
 def get_all_articles(current_admin):
     """Отримує всі статті з можливістю фільтрації"""
     page = request.args.get("page", 1, type=int)
-    per_page = request.args.get("per_page", 10, type=int)
+    per_page = request.args.get("per_page", 1000, type=int)
     status = request.args.get("status")
     category_id = request.args.get("category", type=int)
 
@@ -23,11 +23,11 @@ def get_all_articles(current_admin):
 
     try:
         article_service = ArticleService(get_article_repo())
-        articles = article_service.get_articles(
+        articles, total = article_service.get_articles(
             page=page, per_page=per_page, filters=filters
         )
         result = [article.to_dict(metadata=True) for article in articles]
-        return jsonify({"articles": result, "page": page, "per_page": per_page}), 200
+        return jsonify({"articles": result, "page": page, "per_page": per_page, "total": total}), 200
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
 

@@ -122,7 +122,7 @@
 							<td
 								class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
 							>
-								{author.articles_count ?? 0}
+								{author.total_articles ?? 0}
 							</td>
 							<td
 								class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2"

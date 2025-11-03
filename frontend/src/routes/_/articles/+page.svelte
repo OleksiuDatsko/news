@@ -5,10 +5,11 @@
 	import Button from "$lib/components/ui/Button.svelte";
 	import Alert from "$lib/components/ui/Alert.svelte";
 	import type { PageData } from "./$types";
+	import Pagination from "$lib/components/ui/Pagination.svelte";
 
 	let { data }: { data: PageData } = $props();
 
-	let articles = $state(data.articles);
+	let { articles } = $derived(data);
 	let error = $state("");
 	let loadingAction = $state(false);
 
@@ -186,6 +187,11 @@
 				</tbody>
 			</table>
 		</div>
+		<Pagination
+			currentPage={data.page}
+			perPage={data.perPage}
+			totalItems={data.total}
+		/>
 	{:else}
 		<div class="text-center p-12">
 			<svg

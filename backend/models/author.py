@@ -11,3 +11,16 @@ class Author(BaseModel):
 
     articles = relationship("Article", back_populates="author")
     newsletter_subs = relationship("NewsletterSubscription", back_populates="author")
+    
+    @property
+    def total_articles(self):
+        return len(self.articles)
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "bio": self.bio,
+            "total_articles": self.total_articles,
+        }

@@ -15,15 +15,7 @@ def get_all_categories(current_admin):
         article_repo = get_article_repo()
         
         categories = category_repo.get_all()
-        articles = article_repo.get_all()
-
-        result = []
-        for category in categories:
-            category_data = category.to_dict()
-            category_data["articles_count"] = len(
-                [a for a in articles if a.category_id == category.id]
-            )
-            result.append(category_data)
+        result = [ category.to_dict() for category in categories ]
 
         return jsonify({"categories": result, "total": len(result)}), 200
     except Exception as e:

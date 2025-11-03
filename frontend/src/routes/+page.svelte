@@ -1,6 +1,7 @@
 <script lang="ts">
     import AdCard from "$lib/components/ui/cards/AdCard.svelte";
     import ArticleCard from "$lib/components/ui/cards/ArticleCard.svelte";
+    import Pagination from "$lib/components/ui/Pagination.svelte";
     import type { PageData } from "./$types";
 
     let { data }: { data: PageData } = $props();
@@ -34,6 +35,11 @@
                     </p>
                 </div>
             {/if}
+            <Pagination 
+                currentPage={data.page} 
+                perPage={data.perPage} 
+                totalItems={data.total}
+            />
         </div>
 
         {#if data.ads.length > 0}

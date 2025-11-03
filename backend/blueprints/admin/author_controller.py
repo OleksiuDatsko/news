@@ -10,7 +10,7 @@ author_bp = Blueprint("author", __name__)
 def get_all_authors(current_admin):
     """Отримує всіх авторів"""
     page = request.args.get("page", 1, type=int)
-    per_page = request.args.get("per_page", 10, type=int)
+    per_page = request.args.get("per_page", 1000, type=int)
     search = request.args.get("search", "")
 
     try:
@@ -31,29 +31,12 @@ def get_all_authors(current_admin):
         # Простий варіант пагінації
         start = (page - 1) * per_page
         end = start + per_page
-        paginated_authors = authors[start:end]
-
-        result = []
-        for author in paginated_authors:
-            author_data = author.to_dict()
-
-            # Додаємо кількість статей автора
-            article_repo = get_article_repo()
-            articles_count = len(
-                [
-                    article
-                    for article in article_repo.get_all()
-                    if article.author_id == author.id
-                ]
-            )
-            author_data["articles_count"] = articles_count
-
-            result.append(author_data)
+        paginated_authors = [author.to_dict() for author in authors[start:end]]
 
         return (
             jsonify(
                 {
-                    "authors": result,
+                    "authors": paginated_authors,
                     "page": page,
                     "per_page": per_page,
                     "total": len(authors),

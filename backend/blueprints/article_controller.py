@@ -35,11 +35,11 @@ def get_articles(current_user, ads=[]):
     article_service = ArticleService(article_repo)
 
     try:
-        articles = article_service.get_articles(
+        articles, total = article_service.get_articles(
             page=page, per_page=per_page, filters=filters
         )
         result = [article.to_dict(metadata=True) for article in articles]
-        return jsonify({"articles": result, "ads": ads}), 200
+        return jsonify({"articles": result, "ads": ads, "page": page, "per_page": per_page, "total": total}), 200
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
 
