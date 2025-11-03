@@ -86,34 +86,8 @@ def get_author(current_admin, author_id):
 
         author_data = author.to_dict()
 
-        # Додаємо статистику автора
-        article_repo = get_article_repo()
-        author_articles = [
-            article
-            for article in article_repo.get_all()
-            if article.author_id == author_id
-        ]
-
-        # Підраховуємо статистику
-        stats = {
-            "total_articles": len(author_articles),
-            "published_articles": len(
-                [a for a in author_articles if a.status == "published"]
-            ),
-            "draft_articles": len([a for a in author_articles if a.status == "draft"]),
-            "archived_articles": len(
-                [a for a in author_articles if a.status == "archived"]
-            ),
-            "total_views": sum([a.views_count for a in author_articles]),
-            "exclusive_articles": len([a for a in author_articles if a.is_exclusive]),
-            "breaking_articles": len([a for a in author_articles if a.is_breaking]),
-        }
-
-        author_data["statistics"] = stats
-
-        # Додаємо список останніх статей (топ 5)
         recent_articles = sorted(
-            author_articles, key=lambda x: x.created_at, reverse=True
+            author.articles, key=lambda x: x.created_at, reverse=True
         )[:5]
         author_data["recent_articles"] = [
             {
@@ -379,6 +353,23 @@ def search_authors(current_admin):
                     "authors": found_authors,
                     "query": query,
                     "total_found": len(found_authors),
+                }
+            ),
+            200,
+        )
+    except Exception as e:
+        return jsonify({"msg": str(e)}), 500
+
+@admin_token_required
+def get_category_articles(current_admin, author_id):
+    """Отримує всі статті для конкретної категорії"""
+    try:
+        author = get_author_repo().get_by(id=author_id)
+
+        return (
+            jsonify(
+                {
+                    "articles": [article.to_dict() for article in author.articles],
                 }
             ),
             200,

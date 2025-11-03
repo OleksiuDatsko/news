@@ -13,9 +13,9 @@ def get_all_categories(current_admin):
     try:
         category_repo = get_category_repo()
         article_repo = get_article_repo()
-        
+
         categories = category_repo.get_all()
-        result = [ category.to_dict() for category in categories ]
+        result = [category.to_dict() for category in categories]
 
         return jsonify({"categories": result, "total": len(result)}), 200
     except Exception as e:
@@ -33,14 +33,19 @@ def create_category(current_admin):
 
     try:
         category_repo = get_category_repo()
-        
+
         slug = slugify(data.get("name"))
         if not slug:
-             return jsonify({"msg": "Неможливо згенерувати slug з такої назви"}), 400
-             
+            return jsonify({"msg": "Неможливо згенерувати slug з такої назви"}), 400
+
         existing = category_repo.get_by(slug=slug)
         if existing:
-            return jsonify({"msg": "Категорія з таким slug (або схожою назвою) вже існує"}), 400
+            return (
+                jsonify(
+                    {"msg": "Категорія з таким slug (або схожою назвою) вже існує"}
+                ),
+                400,
+            )
 
         category = category_repo.create(
             {
@@ -86,12 +91,17 @@ def update_category(current_admin, category_id):
             update_data["name"] = data.get("name")
             new_slug = slugify(data.get("name"))
             if not new_slug:
-                 return jsonify({"msg": "Неможливо згенерувати slug з такої назви"}), 400
-                 
+                return jsonify({"msg": "Неможливо згенерувати slug з такої назви"}), 400
+
             existing = category_repo.get_by(slug=new_slug)
             if existing and existing.id != category_id:
-                return jsonify({"msg": "Категорія з таким slug (або схожою назвою) вже існує"}), 400
-            
+                return (
+                    jsonify(
+                        {"msg": "Категорія з таким slug (або схожою назвою) вже існує"}
+                    ),
+                    400,
+                )
+
             update_data["slug"] = new_slug
 
         if "description" in data:
@@ -113,10 +123,15 @@ def delete_category(current_admin, category_id):
         article_repo = get_article_repo()
         articles = article_repo.get_all_by(category_id=category_id)
         if articles:
-            return jsonify({
-                "msg": "Неможливо видалити категорію, оскільки у неї є статті",
-                "articles_count": len(articles)
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "msg": "Неможливо видалити категорію, оскільки у неї є статті",
+                        "articles_count": len(articles),
+                    }
+                ),
+                400,
+            )
 
         category_repo = get_category_repo()
         category = category_repo.get_by(id=category_id)
@@ -133,21 +148,16 @@ def delete_category(current_admin, category_id):
 @admin_token_required
 def get_category_articles(current_admin, category_id):
     """Отримує всі статті для конкретної категорії"""
-    page = request.args.get("page", 1, type=int)
-    per_page = request.args.get("per_page", 10, type=int)
-
     try:
-        article_repo = get_article_repo()
-        filters = {"category_id": category_id}
-        
-        articles = article_repo.get_all(page=page, per_page=per_page, filters=filters)
-        result = [article.to_dict(metadata=True) for article in articles]
+        category = get_category_repo().get_by(id=category_id)
 
-        return jsonify({
-            "articles": result,
-            "page": page,
-            "per_page": per_page,
-            "total": len(article_repo.get_all_by(category_id=category_id))
-        }), 200
+        return (
+            jsonify(
+                {
+                    "articles": [article.to_dict() for article in category.articles],
+                }
+            ),
+            200,
+        )
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
