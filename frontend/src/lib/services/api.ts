@@ -1,14 +1,28 @@
+import { adminStore, userStore } from '$lib/stores/authStore';
+
 type FetchFn = typeof fetch;
 
-const handleResponse = async (response: Response) => {
+export class ApiError extends Error {
+	status: number;
+	body: { msg: string };
+
+	constructor(message: string, status: number, body: any) {
+		super(message);
+		this.name = 'ApiError';
+		this.status = status;
+		this.body = body || { msg: message };
+	}
+}
+
+const handleResponse = async <T>(response: Response): Promise<T> => {
 	if (response.ok) {
 		if (response.status === 204) {
-			return null;
+			return null as T;
 		}
 		try {
 			return await response.json();
 		} catch (e) {
-			return null; // Повертаємо null, якщо тіло відповіді порожнє
+			return null as T;
 		}
 	}
 
@@ -16,14 +30,52 @@ const handleResponse = async (response: Response) => {
 	try {
 		errorBody = await response.json();
 	} catch (e) {
-		errorBody = { msg: 'An unknown error occurred.' };
+		errorBody = { msg: 'Сталася невідома помилка API.' };
 	}
 
-	const apiError = new Error(errorBody.msg || 'API request failed');
-	(apiError as any).status = response.status;
-	(apiError as any).body = errorBody;
-	throw apiError;
+	throw new ApiError(errorBody.msg || 'Запит API не вдався', response.status, errorBody);
 };
+
+let isRefreshing = false;
+let refreshPromise: Promise<void> | null = null;
+
+async function handleRefresh(url: string, baseFetch: FetchFn): Promise<void> {
+	if (isRefreshing && refreshPromise) {
+		return refreshPromise;
+	}
+
+	isRefreshing = true;
+
+	const isAdmin = url.startsWith('/admin/');
+	const refreshUrl = isAdmin ? '/admin/auth/refresh' : '/auth/refresh';
+	const logoutUrl = isAdmin ? '/admin/auth/logout' : '/auth/logout';
+	const fullRefreshUrl = `/api${refreshUrl}`;
+	const fullLogoutUrl = `/api${logoutUrl}`;
+
+	refreshPromise = (async () => {
+		try {
+			const refreshResponse = await baseFetch(fullRefreshUrl, {
+				method: 'POST',
+				credentials: 'include'
+			});
+
+			if (!refreshResponse.ok) {
+				throw new Error('Refresh token failed');
+			}
+		} catch (e) {
+			userStore.set(null);
+			adminStore.set(null);
+
+			await baseFetch(fullLogoutUrl, {method: 'POST'})
+			throw new ApiError('Сесія вичерпана. Будь ласка, увійдіть знову.', 401, null);
+		} finally {
+			isRefreshing = false;
+			refreshPromise = null;
+		}
+	})();
+
+	return refreshPromise;
+}
 
 const request = async <T>(
 	method: string,
@@ -31,6 +83,9 @@ const request = async <T>(
 	data?: unknown,
 	customFetch?: FetchFn
 ): Promise<T> => {
+	const fetchFn = customFetch || fetch;
+	const fullUrl = `/api${url}`;
+
 	const options: RequestInit = {
 		method,
 		credentials: 'include',
@@ -42,14 +97,31 @@ const request = async <T>(
 		options.body = JSON.stringify(data);
 	}
 
-	const fetchFn = customFetch || fetch;
+	try {
+		const response = await fetchFn(fullUrl, options);
 
-	const baseUrl = "/api";
+		if (response.status !== 401) {
+			return handleResponse<T>(response);
+		}
 
-	const fullUrl = `${baseUrl}${url}`;
+		console.log('Token expired, attempting refresh...');
+		await handleRefresh(url, fetchFn);
 
-	const response = await fetchFn(fullUrl, options);
-	return handleResponse(response);
+		console.log('Refresh successful, retrying original request...');
+		const retryResponse = await fetchFn(fullUrl, options);
+
+		return handleResponse<T>(retryResponse);
+	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error;
+		}
+		
+		if (error instanceof Error) {
+			throw new ApiError(error.message || 'Network error', 0, null);
+		}
+
+		throw new ApiError(String(error) || 'Network error', 0, null);
+	}
 };
 
 export const api = {
