@@ -12,6 +12,16 @@ class Category(BaseModel):
     is_searchable = Column(Boolean, nullable=False, default=True)
 
     articles = relationship("Article", back_populates="category")
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "slug": self.slug,
+            "is_searchable": self.is_searchable,
+            "total_articles": len(self.articles),
+        }
 
     __table_args__ = (
         UniqueConstraint('slug', name='uq_categories_slug'),

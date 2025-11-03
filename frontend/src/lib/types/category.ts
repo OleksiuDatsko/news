@@ -4,4 +4,5 @@ export interface ICategory {
 	description: string | null;
 	slug: string;
 	is_searchable: boolean;
+	total_articles: number;
 }
