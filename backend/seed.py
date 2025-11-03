@@ -137,22 +137,23 @@ def seed_database():
             {
                 "name": "Політика",
                 "description": "Новини та аналітика політичного життя.",
+                "slug": "politika",
             }
         )
         cat_tech = category_repo.create(
-            {"name": "Технології", "description": "Огляди гаджетів та новини IT."}
+            {"name": "Технології", "description": "Огляди гаджетів та новини IT.", "slug": "tehnologii"}
         )
         cat_sport = category_repo.create(
-            {"name": "Спорт", "description": "Найважливіші спортивні події."}
+            {"name": "Спорт", "description": "Найважливіші спортивні події.", "slug": "sport"}
         )
         cat_economy = category_repo.create(
-            {"name": "Економіка", "description": "Все про фінанси та бізнес."}
+            {"name": "Економіка", "description": "Все про фінанси та бізнес.", "slug": "ekonomika"}
         )
         cat_culture = category_repo.create(
-            {"name": "Культура", "description": "Мистецтво, кіно та музика."}
+            {"name": "Культура", "description": "Мистецтво, кіно та музика.", "slug": "kultura"}
         )
         cat_travel = category_repo.create(
-            {"name": "Подорожі", "description": "Ідеї для ваших майбутніх мандрівок."}
+            {"name": "Подорожі", "description": "Ідеї для ваших майбутніх мандрівок.", "slug": "podorozhi"}
         )
 
         author1 = author_repo.create(
