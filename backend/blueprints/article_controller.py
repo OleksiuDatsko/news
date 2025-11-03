@@ -20,6 +20,7 @@ def get_articles(current_user, ads=[]):
     per_page = request.args.get("per_page", 10, type=int)
     status = request.args.get("status")
     category_id = request.args.get("category", type=int)
+    category_slug = request.args.get("category_slug", type=str)
     filters = {}
     if status:
         filters["status"] = status
@@ -27,6 +28,8 @@ def get_articles(current_user, ads=[]):
         filters["category_id"] = category_id
     if not getattr(current_user, "permissions", {}).get("exclusive_content", False):
         filters["is_exclusive"] = False
+    if category_slug:
+        filters["category_slug"] = category_slug
 
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)

@@ -2,6 +2,7 @@ from sqlalchemy import and_, desc, func
 from sqlalchemy.orm import Session
 from repositories.repositories import BaseRepository
 from models.article import Article, ArticleInteraction
+from models.category import Category
 
 
 class ArticleRepository(BaseRepository):
@@ -21,6 +22,8 @@ class ArticleRepository(BaseRepository):
                 query = query.filter_by(category_id=filters["category_id"])
             if filters.get("is_exclusive") is not None:
                 query = query.filter_by(is_exclusive=filters["is_exclusive"])
+            if filters.get("category_slug"):
+                query = query.join(Article.category).filter(Category.slug == filters["category_slug"])
 
         offset = (page - 1) * per_page
         return (

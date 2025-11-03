@@ -74,7 +74,7 @@
                 <div class="flex flex-row items-center justify-between">
                     {#if article.category}
                         <a
-                            href="/category/{article.category.name.toLowerCase()}"
+                            href="/categories/{article.category.slug}"
                             class="font-semibold text-indigo-600 hover:underline uppercase text-sm"
                         >
                             {article.category.name}

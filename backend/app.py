@@ -13,6 +13,7 @@ from blueprints import (
     admin_bp,
     ad_bp,
     comment_bp,
+    category_bp
 )
 from config import config
 
@@ -65,6 +66,7 @@ def create_app(config_name="default"):
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(ad_bp, url_prefix="/ads")
     app.register_blueprint(comment_bp, url_prefix="/")
+    app.register_blueprint(category_bp, url_prefix="/categories")
 
     @app.route("/")
     def hello():

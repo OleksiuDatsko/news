@@ -28,19 +28,19 @@
 						Головна
 					</a>
 					<a
-						href="/category/politics"
+						href="/categories/politika"
 						class="text-sm font-medium text-gray-700 hover:text-indigo-600"
 					>
 						Політика
 					</a>
 					<a
-						href="/category/sport"
+						href="/categories/sport"
 						class="text-sm font-medium text-gray-700 hover:text-indigo-600"
 					>
 						Спорт
 					</a>
 					<a
-						href="/category/tech"
+						href="/categories/tehnologii"
 						class="text-sm font-medium text-gray-700 hover:text-indigo-600"
 					>
 						Технології

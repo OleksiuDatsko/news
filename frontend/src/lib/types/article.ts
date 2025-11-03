@@ -1,5 +1,5 @@
 import type { IAuthor } from '$lib/types/author';
-import type { ICategory } from '$lib/types/category';
+import type { ICategory } from '$lib/types/categories';
 
 export interface IArticle {
 	id: number;

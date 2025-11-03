@@ -131,7 +131,7 @@
 			{#if article.category}
 				<span class="text-gray-300 hidden md:inline">|</span>
 				<a
-					href="/category/{article.category.name.toLowerCase()}"
+					href="/categories/{article.category.slug}"
 					class="font-medium text-indigo-600 hover:underline"
 				>
 					{article.category.name}
