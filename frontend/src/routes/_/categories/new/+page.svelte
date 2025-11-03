@@ -36,7 +36,7 @@
 
 <h1 class="text-3xl font-bold text-gray-900 mb-6">Створити Нову Категорію</h1>
 
-<div class="bg-white p-8 rounded-lg shadow-lg max-w-2xl">
+<div class="bg-white p-8 rounded-lg shadow-lg max-w-2xl mx-auto">
 	<form onsubmit={handleSubmit} class="space-y-6">
 		{#if error}
 			<Alert type="error">{error}</Alert>

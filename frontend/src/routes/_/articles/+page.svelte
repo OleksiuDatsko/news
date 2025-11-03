@@ -9,7 +9,7 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let { articles } = $derived(data);
+	let articles = $derived(data.articles);
 	let error = $state("");
 	let loadingAction = $state(false);
 

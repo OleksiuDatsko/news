@@ -7,7 +7,7 @@
     import type { PageData } from "./$types";
 
     let { data }: { data: PageData } = $props();
-    let categories = $state<ICategory[]>(data.categories);
+    let categories = $derived<ICategory[]>(data.categories);
     let error = $state("");
     let loadingAction = $state(false);
 

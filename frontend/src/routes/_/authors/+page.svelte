@@ -8,7 +8,7 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let authors = $state(data.authors);
+	let authors = $derived(data.authors);
 	let error = $state("");
 	let loadingAction = $state(false);
 
