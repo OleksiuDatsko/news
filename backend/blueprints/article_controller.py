@@ -39,9 +39,21 @@ def get_articles(current_user, ads=[]):
             page=page, per_page=per_page, filters=filters
         )
         result = [article.to_dict(metadata=True) for article in articles]
-        return jsonify({"articles": result, "ads": ads, "page": page, "per_page": per_page, "total": total}), 200
+        return (
+            jsonify(
+                {
+                    "articles": result,
+                    "ads": ads,
+                    "page": page,
+                    "per_page": per_page,
+                    "total": total,
+                }
+            ),
+            200,
+        )
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
+
 
 @article_bp.route("/search", methods=["GET"])
 @token_optional
@@ -64,17 +76,23 @@ def search_articles(current_user):
         )
 
         result = [article.to_dict(metadata=True) for article in articles]
-        
-        return jsonify({
-            "articles": result,
-            "query": query,
-            "page": page,
-            "per_page": per_page,
-            "total": total
-        }), 200
-        
+
+        return (
+            jsonify(
+                {
+                    "articles": result,
+                    "query": query,
+                    "page": page,
+                    "per_page": per_page,
+                    "total": total,
+                }
+            ),
+            200,
+        )
+
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
+
 
 @article_bp.route("/<int:article_id>", methods=["GET"])
 @token_optional
@@ -89,7 +107,9 @@ def get_article(current_user, ads, article_id):
             article = article_service.get_article_by_id(article_id, current_user.id)
         else:
             article = article_service.get_article_by_id(article_id)
-        if not getattr(current_user, "permissions", {}).get("exclusive_content", False) and article.get("is_exclusive", False):
+        if not getattr(current_user, "permissions", {}).get(
+            "exclusive_content", False
+        ) and article.get("is_exclusive", False):
             return (
                 jsonify({"msg": "Недостатньо прав для доступу до цього ресурсу"}),
                 403,
@@ -139,6 +159,23 @@ def toggle_save_article(current_user, article_id):
 
     try:
         result = article_service.toggle_save_article(current_user.id, article_id)
+        return jsonify(result), 200
+    except ValueError as e:
+        return jsonify({"msg": str(e)}), 404
+
+
+@article_bp.route("/<int:article_id>/toggle-like", methods=["POST"])
+@token_required
+def toggle_like_article(current_user, article_id):
+    """Перемикає статус лайка статті"""
+    if current_user.is_admin:
+        return jsonify({"msg": "Адмін не може оцінювати статті"}), 403
+
+    article_repo = get_article_repo()
+    article_service = ArticleService(article_repo)
+
+    try:
+        result = article_service.toggle_like_article(current_user.id, article_id)
         return jsonify(result), 200
     except ValueError as e:
         return jsonify({"msg": str(e)}), 404

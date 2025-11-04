@@ -34,6 +34,13 @@ class Article(BaseModel):
     interactions = relationship("ArticleInteraction", back_populates="article")
     notifications = relationship("Notification", back_populates="article")
 
+    @property
+    def likes_count(self):
+        all_likes = [
+            inter for inter in self.interactions if inter.interaction_type == "like"
+        ]
+        return len(all_likes)
+
     def to_dict(self, metadata: bool | None = None):
         if metadata:
             return {
@@ -60,6 +67,7 @@ class Article(BaseModel):
             "views_count": self.views_count,
             "created_at": self.created_at.isoformat(),
             "keywords": [keyword.keyword for keyword in self.keywords],
+            "likes_count": self.likes_count,
         }
 
 

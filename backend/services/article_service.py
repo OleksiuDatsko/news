@@ -39,6 +39,7 @@ class ArticleService:
 
         if user_id:
             result["is_saved"] = self.article_repo.is_article_saved(user_id, article_id)
+            result["is_liked"] = self.article_repo.is_article_liked(user_id, article_id)
 
         return result
 
@@ -82,3 +83,16 @@ class ArticleService:
             return self.unsave_article(user_id, article_id)
         else:
             return self.save_article(user_id, article_id)
+
+    def toggle_like_article(self, user_id: int, article_id: int) -> Dict:
+        """Перемикає статус лайка статті"""
+        article = self.article_repo.get_by_id(article_id)
+        if not article:
+            raise ValueError("Статтю не знайдено")
+
+        is_liked = self.article_repo.toggle_like_article(user_id, article_id)
+
+        if is_liked:
+            return {"message": "Статтю вподобано", "is_liked": True}
+        else:
+            return {"message": "Лайк знято", "is_liked": False}

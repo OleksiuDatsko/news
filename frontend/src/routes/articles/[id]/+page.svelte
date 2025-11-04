@@ -8,14 +8,20 @@
     let { data }: { data: PageData } = $props();
 
     let article = $state(data.article);
-    let isLoading = $state(false);
+    let isLoadingSave = $state(false);
+    let isLoadingLike = $state(false);
     let isSaved = $state(false);
+    let isLiked = $state(false);
+    let likesCount = $state(0);
 
     $effect(() => {
         isSaved = article?.is_saved ?? false;
+        isLiked = article?.is_liked ?? false;
+        likesCount = article?.likes_count ?? 0;
     });
 
     const canSave = $userStore?.permissions?.save_article;
+    const canLike = !!$userStore;
 
     function formatDate(dateString: string) {
         return new Date(dateString).toLocaleDateString("uk-UA", {
@@ -28,8 +34,8 @@
     }
 
     async function handleToggleSave() {
-        if (isLoading || !article) return;
-        isLoading = true;
+        if (isLoadingSave || !article) return;
+        isLoadingSave = true;
 
         const originalState = isSaved;
         isSaved = !isSaved;
@@ -56,7 +62,33 @@
             console.error("Failed to toggle save:", error);
             isSaved = originalState;
         } finally {
-            isLoading = false;
+            isLoadingSave = false;
+        }
+    }
+
+    async function handleToggleLike() {
+        if (isLoadingLike || !article) return;
+        isLoadingLike = true;
+
+        const originalState = isLiked;
+        isLiked = !isLiked;
+        if (isLiked) {
+            likesCount = likesCount + 1;
+        } else {
+            likesCount = Math.max(0, likesCount - 1); // Захист від < 0
+        }
+
+        try {
+            const response = await api.post<{ is_liked: boolean }>(
+                `/articles/${article.id}/toggle-like`,
+                {},
+            );
+            isLiked = response.is_liked;
+        } catch (error) {
+            console.error("Failed to toggle like:", error);
+            isLiked = originalState;
+        } finally {
+            isLoadingLike = false;
         }
     }
 </script>
@@ -102,11 +134,10 @@
                     <h1 class="text-3xl md:text-5xl font-bold text-gray-900">
                         {article.title}
                     </h1>
-
                     {#if canSave}
                         <button
                             onclick={handleToggleSave}
-                            disabled={isLoading}
+                            disabled={isLoadingSave}
                             class="hidden lg:flex items-center gap-2 px-4 py-2
                                    rounded-md font-medium shadow-sm transition-colors
                                    disabled:opacity-60 ml-6 shrink-0
@@ -146,11 +177,39 @@
                         <span class="text-gray-400 hidden md:inline">|</span>
                         <span>{formatDate(article.created_at)}</span>
                     </div>
-
+                    {#if canLike}
+                        <button
+                            onclick={handleToggleLike}
+                            disabled={isLoadingLike}
+                            class="flex items-center gap-2 px-4 py-2 rounded-md font-medium shadow-sm transition-colors
+                                       disabled:opacity-60
+                                       {isLiked
+                                ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                                : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                class="w-5 h-5"
+                                fill="currentColor"
+                            >
+                                <path
+                                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                                    class:opacity-30={!isLiked}
+                                />
+                            </svg>
+                            {isLiked ? "Вподобано" : "Лайк"}
+                            <span class="font-semibold">{likesCount}</span>
+                        </button>
+                    {:else}
+                    <div class="rounded-md font-medium shadow-sm transition-colors bg-red-50 text-red-600 hover:bg-red-100 p-2 text-center">
+                        <span class="font-semibold">Вподобайки {likesCount}</span>
+                    </div>
+                    {/if}
                     {#if canSave}
                         <button
                             onclick={handleToggleSave}
-                            disabled={isLoading}
+                            disabled={isLoadingSave}
                             class="flex lg:hidden items-center justify-center w-full mt-4 gap-2 px-4 py-3
                                    rounded-md font-medium text-white shadow-sm transition-colors
                                    disabled:opacity-60

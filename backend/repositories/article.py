@@ -74,7 +74,7 @@ class ArticleRepository(BaseRepository):
 
         total = query.count()
         offset = (page - 1) * per_page
-        
+
         articles = (
             query.order_by(desc(Article.created_at))
             .offset(offset)
@@ -171,3 +171,47 @@ class ArticleRepository(BaseRepository):
         )
 
         return saved is not None
+
+    def is_article_liked(self, user_id: int, article_id: int):
+        """Перевіряє, чи лайкнув користувач статтю"""
+        liked = (
+            self.db_session.query(ArticleInteraction)
+            .filter(
+                and_(
+                    ArticleInteraction.user_id == user_id,
+                    ArticleInteraction.article_id == article_id,
+                    ArticleInteraction.interaction_type == "like",
+                )
+            )
+            .first()
+        )
+        return liked is not None
+
+    def toggle_like_article(self, user_id: int, article_id: int):
+        """Додає або видаляє лайк для статті"""
+        existing = (
+            self.db_session.query(ArticleInteraction)
+            .filter(
+                and_(
+                    ArticleInteraction.user_id == user_id,
+                    ArticleInteraction.article_id == article_id,
+                    ArticleInteraction.interaction_type == "like",
+                )
+            )
+            .first()
+        )
+
+        if existing:
+            self.db_session.delete(existing)
+            self.db_session.commit()
+            return False
+        else:
+            interaction = ArticleInteraction(
+                user_id=user_id,
+                article_id=article_id,
+                interaction_type="like",
+                value=1,
+            )
+            self.db_session.add(interaction)
+            self.db_session.commit()
+            return True 
