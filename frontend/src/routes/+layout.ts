@@ -1,6 +1,7 @@
 import { userStore, adminStore } from '$lib/stores/authStore';
 import { categoryStore } from '$lib/stores/categoryStore';
 import { api } from '$lib/services/api';
+import { get } from 'svelte/store'; // <--- ДОДАНО: Імпорт 'get'
 import type { LayoutLoad } from './$types';
 import type { IUser } from '$lib/types/user';
 import type { IAdmin } from '$lib/types/admin';
@@ -16,47 +17,58 @@ export const load: LayoutLoad = async ({ fetch, url }) => {
 
 	const promises = [];
 	if (!isPublicRoute) {
-		const authPromise = (async () => {
-			try {
-				const { admin } = await api.get<{ admin: IAdmin }>('/admin/auth/me', fetch);
-				adminStore.set(admin);
-			} catch (e) {
-				adminStore.set(null);
+		const currentUser = get(userStore);
+		const currentAdmin = get(adminStore);
+
+		if (!currentUser && !currentAdmin) {
+			const authPromise = (async () => {
 				try {
-					const { user } = await api.get<{ user: IUser }>('/auth/me', fetch);
-					const canSave = user?.permissions?.save_article;
-					if (canSave && user) {
-						const savedArticles = await api.get<number[]>(
-							'/articles/saved?ids=true',
-							fetch
-						);
-						user.savedArticles = savedArticles;
+					const { admin } = await api.get<{ admin: IAdmin }>(
+						'/admin/auth/me',
+						fetch
+					);
+					adminStore.set(admin);
+				} catch (e) {
+					adminStore.set(null);
+					try {
+						const { user } = await api.get<{ user: IUser }>('/auth/me', fetch);
+						const canSave = user?.permissions?.save_article;
+						if (canSave && user) {
+							const savedArticles = await api.get<number[]>(
+								'/articles/saved?ids=true',
+								fetch
+							);
+							user.savedArticles = savedArticles;
+						}
+						userStore.set(user);
+					} catch (err) {
+						userStore.set(null);
 					}
-					userStore.set(user);
-				} catch (err) {
-					userStore.set(null);
 				}
-			}
-		})();
-		promises.push(authPromise);
+			})();
+			promises.push(authPromise);
+		}
 	} else {
 		userStore.set(null);
 		adminStore.set(null);
 	}
 
-	const categoryPromise = (async () => {
-		try {
-			const { categories } = await api.get<{ categories: ICategory[] }>(
-				'/categories/',
-				fetch
-			);
-			categoryStore.set(categories);
-		} catch (e) {
-			console.error('Failed to load categories', e);
-			categoryStore.set([]);
-		}
-	})();
-	promises.push(categoryPromise);
+	const currentCategories = get(categoryStore);
+	if (currentCategories.length === 0) {
+		const categoryPromise = (async () => {
+			try {
+				const { categories } = await api.get<{ categories: ICategory[] }>(
+					'/categories/',
+					fetch
+				);
+				categoryStore.set(categories);
+			} catch (e) {
+				console.error('Failed to load categories', e);
+				categoryStore.set([]);
+			}
+		})();
+		promises.push(categoryPromise);
+	}
 
 	await Promise.all(promises);
 	return {};
