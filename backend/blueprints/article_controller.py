@@ -102,6 +102,8 @@ def search_articles(current_user):
     query = request.args.get("q")
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
+    date_from = request.args.get("date_from")
+    date_to = request.args.get("date_to")
 
     if not query:
         return jsonify({"msg": "Параметр 'q' є обов'язковим"}), 400
@@ -113,7 +115,12 @@ def search_articles(current_user):
         user_permissions = current_user.permissions if current_user else {}
 
         articles, total = article_service.search_articles(
-            query, page, per_page, user_permissions=user_permissions
+            query,
+            page,
+            per_page,
+            user_permissions=user_permissions,
+            date_from=date_from,
+            date_to=date_to,
         )
 
         result = [article.to_dict(metadata=True) for article in articles]
@@ -126,6 +133,8 @@ def search_articles(current_user):
                     "page": page,
                     "per_page": per_page,
                     "total": total,
+                    "date_from": date_from,
+                    "date_to": date_to,
                 }
             ),
             200,

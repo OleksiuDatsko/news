@@ -18,6 +18,8 @@ class ArticleService:
         page: int = 1,
         per_page: int = 10,
         user_permissions: dict = None,
+        date_from: Optional[str] = None,
+        date_to: Optional[str] = None,
     ):
         """
         Сервісний шар для пошуку статей.
@@ -26,7 +28,12 @@ class ArticleService:
             return [], 0
 
         return self.article_repo.search(
-            query, page, per_page, user_permissions=user_permissions
+            query,
+            page,
+            per_page,
+            user_permissions=user_permissions,
+            date_from=date_from,
+            date_to=date_to,
         )
 
     def get_article_by_id(self, article_id: int, user_id: Optional[int] = None) -> Dict:

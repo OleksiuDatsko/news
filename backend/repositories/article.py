@@ -1,9 +1,11 @@
+from typing import Optional
 from sqlalchemy import and_, desc, func, or_
 from sqlalchemy.orm import Session
 from repositories.repositories import BaseRepository
 from models.article import Article, ArticleInteraction
 from models.category import Category
 from models.author import Author
+from datetime import datetime, timedelta
 
 
 class ArticleRepository(BaseRepository):
@@ -49,6 +51,8 @@ class ArticleRepository(BaseRepository):
         page: int = 1,
         per_page: int = 10,
         user_permissions: dict = None,
+        date_from: Optional[str] = None,
+        date_to: Optional[str] = None,
     ):
         """
         Виконує повнотекстовий пошук по статтях та авторах
@@ -71,6 +75,17 @@ class ArticleRepository(BaseRepository):
 
         if user_permissions and not user_permissions.get("exclusive_content", False):
             query = query.filter(Article.is_exclusive == False)
+
+        try:
+            if date_from:
+                parsed_date_from = datetime.fromisoformat(date_from)
+                query = query.filter(Article.created_at >= parsed_date_from)
+
+            if date_to:
+                parsed_date_to = datetime.fromisoformat(date_to) + timedelta(days=1)
+                query = query.filter(Article.created_at < parsed_date_to)
+        except ValueError:
+            pass
 
         total = query.count()
         offset = (page - 1) * per_page
