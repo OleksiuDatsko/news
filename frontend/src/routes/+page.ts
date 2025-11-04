@@ -1,6 +1,8 @@
 import { api } from '$lib/services/api';
+import { userStore } from '$lib/stores/authStore';
 import type { IAd } from '$lib/types/ad';
 import type { IArticle } from '$lib/types/article';
+import { get } from 'svelte/store';
 import type { PageLoad } from './$types';
 
 interface ArticleData {
@@ -13,7 +15,12 @@ interface ArticleData {
 
 export const load: PageLoad = async ({ fetch, url }) => {	const page = url.searchParams.get('page') || '1';
 	try {
-		const data = await api.get<ArticleData>(`/articles/?page=${page}`, fetch);
+		let data;
+		if (get(userStore)?.id) {
+			data = await api.get<ArticleData>(`/articles/recommended?page=${page}`, fetch); 
+		} else {
+			data = await api.get<ArticleData>(`/articles/?page=${page}`, fetch);
+		}
 		return {
 			articles: data.articles,
 			ads: data.ads,

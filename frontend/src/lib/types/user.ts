@@ -10,4 +10,7 @@ export interface IUser {
   };
   created_at: string;
   savedArticles?: number[];
+  preferences: {
+    [key: string]: any
+  }
 }

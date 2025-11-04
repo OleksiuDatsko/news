@@ -95,6 +95,26 @@ def me():
     
     return jsonify({"user": current_user.to_dict()}), 200
 
+@auth_bp.route("/me/preferences", methods=["PUT"])
+@jwt_required()
+def update_preferences():
+    """Оновлює налаштування (preferences) поточного користувача"""
+    current_user_id = get_jwt_identity()
+    data = request.get_json()
+
+    if data is None:
+        return jsonify({"msg": "Тіло запиту не може бути порожнім"}), 400
+
+    user_repo = get_user_repo()
+    auth_service = AuthService(user_repo)
+    current_user = auth_service.get_current_user(current_user_id)
+    
+    try:
+        updated_user = user_repo.update(current_user, {"preferences": data})
+        # Повертаємо оновлений об'єкт user
+        return jsonify({"user": updated_user.to_dict()}), 200
+    except Exception as e:
+        return jsonify({"msg": str(e)}), 500
 
 @auth_bp.route("/logout", methods=["POST"])
 def logout():

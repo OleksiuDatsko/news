@@ -55,6 +55,47 @@ def get_articles(current_user, ads=[]):
         return jsonify({"msg": str(e)}), 500
 
 
+@article_bp.route("/recommended", methods=["GET"])
+@token_required
+@ads_injector(ad_type="inline")
+def get_recommended_articles(current_user, ads=[]):
+    """Отримує рекомендовані статті на основі уподобань користувача"""
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 5, type=int)
+    status = request.args.get("satus", "published", type=str)
+    article_repo = get_article_repo()
+    article_service = ArticleService(article_repo)
+
+    filters = {"status": status}
+    preferences = current_user.preferences or {}
+    fav_category_slugs = preferences.get("favorite_categories", [])
+    if len(fav_category_slugs) > 0:
+        filters["category_slugs"] = fav_category_slugs
+
+    if not getattr(current_user, "permissions", {}).get("exclusive_content", False):
+        filters["is_exclusive"] = False
+
+    try:
+        articles, total = article_service.get_articles(
+            page=page, per_page=per_page, filters=filters
+        )
+        result = [article.to_dict(metadata=True) for article in articles]
+        return (
+            jsonify(
+                {
+                    "articles": result,
+                    "ads": ads,
+                    "page": page,
+                    "per_page": per_page,
+                    "total": total,
+                }
+            ),
+            200,
+        )
+    except Exception as e:
+        return jsonify({"msg": str(e)}), 500
+
+
 @article_bp.route("/search", methods=["GET"])
 @token_optional
 def search_articles(current_user):

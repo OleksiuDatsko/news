@@ -23,7 +23,12 @@ class ArticleRepository(BaseRepository):
                 query = query.filter_by(category_id=filters["category_id"])
             if filters.get("is_exclusive") is not None:
                 query = query.filter_by(is_exclusive=filters["is_exclusive"])
-            if filters.get("category_slug"):
+
+            if filters.get("category_slugs"):
+                query = query.join(Article.category).filter(
+                    Category.slug.in_(filters["category_slugs"])
+                )
+            elif filters.get("category_slug"):
                 query = query.join(Article.category).filter(
                     Category.slug == filters["category_slug"]
                 )
@@ -49,12 +54,10 @@ class ArticleRepository(BaseRepository):
         Виконує повнотекстовий пошук по статтях та авторах
         З УНІВЕРСАЛЬНИМ ігноруванням регістру.
         """
-        # 1. Примусово переводимо пошуковий запит в нижній регістр
         search_term = f"%{query_string}%"
 
         query = self.db_session.query(Article).join(Article.author)
 
-        # 2. Переводимо КОЖНУ колонку в нижній регістр перед порівнянням
         query = query.filter(
             or_(
                 Article.title.like(search_term),
@@ -64,11 +67,8 @@ class ArticleRepository(BaseRepository):
             )
         )
 
-        # 3. Фільтр за статусом (можливо, тут була проблема при тестуванні)
-        # Пошук показує ТІЛЬКИ опубліковані статті
         query = query.filter(Article.status == "published")
 
-        # Враховуємо права користувача на ексклюзивний контент
         if user_permissions and not user_permissions.get("exclusive_content", False):
             query = query.filter(Article.is_exclusive == False)
 
@@ -214,4 +214,4 @@ class ArticleRepository(BaseRepository):
             )
             self.db_session.add(interaction)
             self.db_session.commit()
-            return True 
+            return True
