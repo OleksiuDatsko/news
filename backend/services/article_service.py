@@ -12,6 +12,23 @@ class ArticleService:
         """Отримує список статей з фільтрами"""
         return self.article_repo.get_all(page=page, per_page=per_page, filters=filters)
 
+    def search_articles(
+        self,
+        query: str,
+        page: int = 1,
+        per_page: int = 10,
+        user_permissions: dict = None,
+    ):
+        """
+        Сервісний шар для пошуку статей.
+        """
+        if not query or len(query) < 3:
+            return [], 0
+
+        return self.article_repo.search(
+            query, page, per_page, user_permissions=user_permissions
+        )
+
     def get_article_by_id(self, article_id: int, user_id: Optional[int] = None) -> Dict:
         """Отримує статтю за ID з додатковою інформацією"""
         article = self.article_repo.get_by_id(article_id)

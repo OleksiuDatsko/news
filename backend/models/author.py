@@ -16,6 +16,7 @@ class Author(BaseModel):
     def total_articles(self):
         return len(self.articles)
     
+    
     def to_dict(self):
         return {
             "id": self.id,

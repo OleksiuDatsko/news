@@ -43,6 +43,38 @@ def get_articles(current_user, ads=[]):
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
 
+@article_bp.route("/search", methods=["GET"])
+@token_optional
+def search_articles(current_user):
+    query = request.args.get("q")
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 10, type=int)
+
+    if not query:
+        return jsonify({"msg": "Параметр 'q' є обов'язковим"}), 400
+
+    article_repo = get_article_repo()
+    article_service = ArticleService(article_repo)
+
+    try:
+        user_permissions = current_user.permissions if current_user else {}
+
+        articles, total = article_service.search_articles(
+            query, page, per_page, user_permissions=user_permissions
+        )
+
+        result = [article.to_dict(metadata=True) for article in articles]
+        
+        return jsonify({
+            "articles": result,
+            "query": query,
+            "page": page,
+            "per_page": per_page,
+            "total": total
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"msg": str(e)}), 500
 
 @article_bp.route("/<int:article_id>", methods=["GET"])
 @token_optional

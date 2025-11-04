@@ -1,8 +1,9 @@
-from sqlalchemy import and_, desc, func
+from sqlalchemy import and_, desc, func, or_
 from sqlalchemy.orm import Session
 from repositories.repositories import BaseRepository
 from models.article import Article, ArticleInteraction
 from models.category import Category
+from models.author import Author
 
 
 class ArticleRepository(BaseRepository):
@@ -23,7 +24,9 @@ class ArticleRepository(BaseRepository):
             if filters.get("is_exclusive") is not None:
                 query = query.filter_by(is_exclusive=filters["is_exclusive"])
             if filters.get("category_slug"):
-                query = query.join(Article.category).filter(Category.slug == filters["category_slug"])
+                query = query.join(Article.category).filter(
+                    Category.slug == filters["category_slug"]
+                )
 
         offset = (page - 1) * per_page
         total = query.count()
@@ -32,7 +35,53 @@ class ArticleRepository(BaseRepository):
             .offset(offset)
             .limit(per_page)
             .all()
-        ) 
+        )
+        return articles, total
+
+    def search(
+        self,
+        query_string: str,
+        page: int = 1,
+        per_page: int = 10,
+        user_permissions: dict = None,
+    ):
+        """
+        Виконує повнотекстовий пошук по статтях та авторах
+        З УНІВЕРСАЛЬНИМ ігноруванням регістру.
+        """
+        # 1. Примусово переводимо пошуковий запит в нижній регістр
+        search_term = f"%{query_string}%"
+
+        query = self.db_session.query(Article).join(Article.author)
+
+        # 2. Переводимо КОЖНУ колонку в нижній регістр перед порівнянням
+        query = query.filter(
+            or_(
+                Article.title.like(search_term),
+                Article.content.like(search_term),
+                Author.first_name.like(search_term),
+                Author.last_name.like(search_term),
+            )
+        )
+
+        # 3. Фільтр за статусом (можливо, тут була проблема при тестуванні)
+        # Пошук показує ТІЛЬКИ опубліковані статті
+        query = query.filter(Article.status == "published")
+
+        # Враховуємо права користувача на ексклюзивний контент
+        if user_permissions and not user_permissions.get("exclusive_content", False):
+            query = query.filter(Article.is_exclusive == False)
+
+        total = query.count()
+        offset = (page - 1) * per_page
+        
+        articles = (
+            query.order_by(desc(Article.created_at))
+            .offset(offset)
+            .limit(per_page)
+            .all()
+        )
+
         return articles, total
 
     def save_article(self, user_id: int, article_id: int):

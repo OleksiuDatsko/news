@@ -1,21 +1,19 @@
 <script lang="ts">
 	import { adminStore, userStore } from "$lib/stores/authStore";
 	import { categoryStore } from "$lib/stores/categoryStore";
-	import { api } from "$lib/services/api";
 	import { goto } from "$app/navigation";
 
-	async function handleLogout() {
-		if ($userStore) {
-			await api.post("/auth/logout", {});
-			userStore.set(null);
-		} else if ($adminStore) {
-			await api.post("/admin/auth/logout", {});
-			adminStore.set(null);
-		}
-		await goto("/");
-	}
-
 	let topCategories = $derived($categoryStore.slice(0, 3));
+
+	let searchTerm = $state("");
+
+	function handleSearch(event: Event) {
+		event.preventDefault();
+		if (searchTerm.trim()) {
+			goto(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+			searchTerm = "";
+		}
+	}
 </script>
 
 <header class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
@@ -25,7 +23,6 @@
 				<a href="/" class="text-2xl font-bold text-indigo-600">
 					NewsApp
 				</a>
-
 				<div class="hidden md:flex gap-5">
 					<a
 						href="/"
@@ -45,7 +42,17 @@
 					{/if}
 				</div>
 			</div>
-
+			<div class="flex-1 px-4 max-w-lg mx-auto">
+				<form onsubmit={handleSearch} class="w-full">
+					<input
+						type="search"
+						bind:value={searchTerm}
+						placeholder="Пошук за ключовим словом, автором..."
+						class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm
+						   focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+					/>
+				</form>
+			</div>
 			<div class="flex items-center gap-4">
 				{#if $userStore}
 					<span class="text-sm text-gray-600 hidden sm:block">
@@ -57,12 +64,6 @@
 							{$userStore.username}
 						</a>
 					</span>
-					<button
-						onclick={handleLogout}
-						class="text-sm font-medium text-gray-700 hover:text-indigo-600"
-					>
-						Вийти
-					</button>
 				{:else if $adminStore}
 					<span class="text-sm text-gray-600 hidden sm:block">
 						Admin:
