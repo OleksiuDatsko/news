@@ -1,21 +1,21 @@
 <script lang="ts">
-	import { userStore } from '$lib/stores/authStore';
-	import { api } from '$lib/services/api';
-	import { goto } from '$app/navigation';
-	import Button from '$lib/components/ui/Button.svelte';
+	import { userStore } from "$lib/stores/authStore";
+	import { api } from "$lib/services/api";
+	import { goto } from "$app/navigation";
+	import Button from "$lib/components/ui/Button.svelte";
 
-	let error = $state('');
+	let error = $state("");
 	let loading = $state(false);
 
 	async function handleLogout() {
 		loading = true;
-		error = '';
+		error = "";
 		try {
-			await api.post('/auth/logout', {});
+			await api.post("/auth/logout", {});
 			userStore.set(null);
-			await goto('/');
+			await goto("/");
 		} catch (e: any) {
-			error = e.message || 'Помилка виходу';
+			error = e.message || "Помилка виходу";
 			loading = false;
 		}
 	}
@@ -30,11 +30,11 @@
 		Вітаємо, {$userStore?.username}!
 	</h1>
 	<p class="text-lg text-gray-600 mb-8">
-		Це ваш особистий кабінет. Тут ви можете керувати своїми налаштуваннями, підписками та збереженими статтями.
+		Це ваш особистий кабінет. Тут ви можете керувати своїми налаштуваннями,
+		підписками та збереженими статтями.
 	</p>
 
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-		
 		{#if $userStore?.permissions?.save_article}
 			<a
 				href="/profile/saved"
@@ -99,6 +99,26 @@
 				Перейти &rarr;
 			</div>
 		</a>
+		<a
+			href="/profile/notifications"
+			class="group bg-white p-6 rounded-lg shadow-lg hover:shadow-xl
+				   border border-gray-100 hover:border-indigo-500
+				   transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+		>
+			<h3
+				class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors duration-300"
+			>
+				Історія сповіщень
+			</h3>
+			<p class="mt-1 text-sm text-gray-500">
+				Переглянути всі отримані сповіщення.
+			</p>
+			<div
+				class="mt-4 text-sm font-medium text-indigo-600 group-hover:text-indigo-700"
+			>
+				Перейти &rarr;
+			</div>
+		</a>
 	</div>
 
 	<div class="bg-white p-6 rounded-lg shadow-lg border border-gray-100">
@@ -106,7 +126,11 @@
 		<p class="text-sm text-gray-600 mb-4">
 			Ви увійшли як: <span class="font-medium">{$userStore?.email}</span>
 		</p>
-		<Button onclick={handleLogout} loading={loading} class="!w-auto !bg-red-600 hover:!bg-red-700">
+		<Button
+			onclick={handleLogout}
+			{loading}
+			class="!w-auto !bg-red-600 hover:!bg-red-700"
+		>
 			Вийти з акаунту
 		</Button>
 	</div>

@@ -5,3 +5,4 @@ from .admin import admin_bp
 from .ad_controller import ad_bp
 from .comment_controller import comment_bp
 from .category_controller import category_bp
+from .notification_controller import notification_bp

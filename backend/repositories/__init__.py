@@ -1,4 +1,5 @@
 from flask import g
+from repositories.notification import NotificationRepository
 from repositories.ad import AdRepository
 from repositories.ad_view import AdViewRepository
 from repositories.admin import AdminRepository
@@ -35,3 +36,6 @@ def get_subscription_repo() -> SubscriptionRepository:
 
 def get_user_repo() -> UserRepository:
     return UserRepository(g.db_session)
+
+def get_notification_repo() -> NotificationRepository:
+    return NotificationRepository(g.db_session)

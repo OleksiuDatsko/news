@@ -1,7 +1,9 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, g, request, jsonify
 from middleware.auth_middleware import admin_token_required
+from models.article import Article
 from repositories import get_article_repo
 from services.article_service import ArticleService
+from services.notification_service import notification_service
 
 article_bp = Blueprint("article", __name__)
 
@@ -27,7 +29,12 @@ def get_all_articles(current_admin):
             page=page, per_page=per_page, filters=filters
         )
         result = [article.to_dict(metadata=True) for article in articles]
-        return jsonify({"articles": result, "page": page, "per_page": per_page, "total": total}), 200
+        return (
+            jsonify(
+                {"articles": result, "page": page, "per_page": per_page, "total": total}
+            ),
+            200,
+        )
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
 
@@ -87,6 +94,17 @@ def update_article(current_admin, article_id):
         if not article:
             return jsonify({"msg": "Статтю не знайдено"}), 404
 
+        old_status = article.status
+        new_status = data.get("status", old_status)
+
+        if old_status != "published" and new_status == "published":
+            for field in data:
+                if hasattr(article, field):
+                    setattr(article, field, data[field])
+
+            _ = article.category
+            notification_service.notify(article, g.db_session)
+
         update_data = {}
         updatable_fields = [
             "title",
@@ -128,12 +146,22 @@ def delete_article(current_admin, article_id):
 def update_article_status(current_admin, article_id):
     """Оновлює статус статті"""
     data = request.get_json()
+    new_status = data.get("status")
 
-    if not data.get("status"):
+    if not new_status:
         return jsonify({"msg": "Статус є обов'язковим"}), 400
 
     valid_statuses = ["draft", "published", "archived"]
-    if data.get("status") not in valid_statuses:
+    if new_status not in valid_statuses:
+        return (
+            jsonify(
+                {"msg": f"Невірний статус. Допустимі: {', '.join(valid_statuses)}"}
+            ),
+            400,
+        )
+
+    valid_statuses = ["draft", "published", "archived"]
+    if new_status not in valid_statuses:
         return (
             jsonify(
                 {"msg": f"Невірний статус. Допустимі: {', '.join(valid_statuses)}"}
@@ -146,6 +174,12 @@ def update_article_status(current_admin, article_id):
         article = article_repo.get_by(id=article_id)
         if not article:
             return jsonify({"msg": "Статтю не знайдено"}), 404
+
+        old_status = article.status
+        if old_status != "published" and new_status == "published":
+            article.status = new_status
+            _ = article.category
+            notification_service.notify(article, g.db_session)
 
         updated_article = article_repo.update(article, {"status": data.get("status")})
         return jsonify(updated_article.to_dict()), 200

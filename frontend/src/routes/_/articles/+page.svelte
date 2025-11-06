@@ -12,6 +12,7 @@
 	let articles = $derived(data.articles);
 	let error = $state("");
 	let loadingAction = $state(false);
+	let loadingPublishId = $state<number | null>(null);
 
 	function formatDate(dateString: string) {
 		return new Date(dateString).toLocaleDateString("uk-UA", {
@@ -57,6 +58,31 @@
 				return "bg-gray-100 text-gray-600";
 			default:
 				return "bg-gray-100 text-gray-800";
+		}
+	}
+
+	async function handlePublish(articleId: number) {
+		if (loadingAction || loadingPublishId) return;
+
+		loadingPublishId = articleId;
+		error = "";
+		try {
+			// Використовуємо існуючий API-ендпоінт для оновлення статусу
+			const updatedArticle = await api.put<IArticle>(
+				`/admin/articles/${articleId}/status`,
+				{
+					status: "published",
+				},
+			);
+
+			// Оновлюємо дані в таблиці "на льоту" без перезавантаження
+			articles = articles.map((a) =>
+				a.id === articleId ? updatedArticle : a,
+			);
+		} catch (e: any) {
+			error = e.message || "Помилка публікації статті.";
+		} finally {
+			loadingPublishId = null;
 		}
 	}
 </script>
@@ -167,6 +193,19 @@
 							<td
 								class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2"
 							>
+								{#if article.status === "draft"}
+									<Button
+										onclick={() =>
+											handlePublish(article.id)}
+										loading={loadingPublishId ===
+											article.id}
+										disabled={loadingAction ||
+											loadingPublishId !== null}
+										class="!w-auto !py-1 !px-3 !bg-green-600 hover:!bg-green-700 !text-xs !font-medium"
+									>
+										Опублікувати
+									</Button>
+								{/if}
 								<Button
 									onclick={() => handleEdit(article.id)}
 									disabled={loadingAction}

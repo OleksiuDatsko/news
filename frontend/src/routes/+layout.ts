@@ -1,7 +1,8 @@
 import { userStore, adminStore } from '$lib/stores/authStore';
 import { categoryStore } from '$lib/stores/categoryStore';
 import { api } from '$lib/services/api';
-import { get } from 'svelte/store'; // <--- ДОДАНО: Імпорт 'get'
+import { get } from 'svelte/store';
+import { notificationStore, loadNotifications } from '$lib/stores/notificationStore';
 import type { LayoutLoad } from './$types';
 import type { IUser } from '$lib/types/user';
 import type { IAdmin } from '$lib/types/admin';
@@ -19,6 +20,7 @@ export const load: LayoutLoad = async ({ fetch, url }) => {
 	if (!isPublicRoute) {
 		const currentUser = get(userStore);
 		const currentAdmin = get(adminStore);
+		const notificationsLoaded = get(notificationStore).loaded;
 
 		if (!currentUser && !currentAdmin) {
 			const authPromise = (async () => {
@@ -41,6 +43,9 @@ export const load: LayoutLoad = async ({ fetch, url }) => {
 							user.savedArticles = savedArticles;
 						}
 						userStore.set(user);
+						if (user && !notificationsLoaded) {
+							loadNotifications(fetch);
+						}
 					} catch (err) {
 						userStore.set(null);
 					}
