@@ -5,11 +5,13 @@
 	import { api } from "$lib/services/api";
 	import { notificationStore } from "$lib/stores/notificationStore";
 	import NotificationDropdown from "../notification/NotificationDropdown.svelte";
+	import { page } from "$app/state";
 
 	let topCategories = $derived($categoryStore.slice(0, 3));
 
 	let searchTerm = $state("");
 	let showNotifications = $state(false);
+	const editablePages = ["articles", "authors"];
 
 	function handleDocumentClick(event: MouseEvent) {
 		const target = event.target as HTMLElement;
@@ -128,6 +130,16 @@
 							</a>
 						</span>
 					{:else if $adminStore}
+						{#if editablePages.find((p) => p == page.url.pathname.split("/")[1])}
+							<span class="text-sm text-gray-600 hidden sm:block">
+								<a
+									href={`/_${page.url.pathname}`}
+									class="font-medium text-gray-900 hover:underline"
+								>
+									Редагувати
+								</a>
+							</span>
+						{/if}
 						<span class="text-sm text-gray-600 hidden sm:block">
 							Admin:
 							<a
