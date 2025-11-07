@@ -13,4 +13,5 @@ export interface IUser {
   preferences: {
     [key: string]: any
   }
+  followed_authors?: number[];
 }

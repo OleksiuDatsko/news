@@ -1,6 +1,14 @@
-from sqlalchemy import Column, Text
+from sqlalchemy import Column, ForeignKey, Integer, Table, Text
 from sqlalchemy.orm import relationship
-from models.base import BaseModel
+from models.base import Base, BaseModel
+
+
+author_followers = Table(
+    "author_followers",
+    Base.metadata,
+    Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
+    Column("author_id", Integer, ForeignKey("authors.id"), primary_key=True),
+)
 
 
 class Author(BaseModel):
@@ -11,12 +19,17 @@ class Author(BaseModel):
 
     articles = relationship("Article", back_populates="author")
     newsletter_subs = relationship("NewsletterSubscription", back_populates="author")
-    
+    followers = relationship(
+        "User",
+        secondary=author_followers,
+        back_populates="followed_authors",
+        lazy="dynamic",
+    )
+
     @property
     def total_articles(self):
         return len(self.articles)
-    
-    
+
     def to_dict(self):
         return {
             "id": self.id,

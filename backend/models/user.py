@@ -1,6 +1,7 @@
 from sqlalchemy import JSON, Column, DateTime, Text, func
 from sqlalchemy.orm import relationship
 from models.base import BaseModel
+from .author import author_followers
 
 
 class User(BaseModel):
@@ -22,6 +23,9 @@ class User(BaseModel):
     subscriptions = relationship("UserSubscriptionPlan", back_populates="user")
     newsletter_subs = relationship("NewsletterSubscription", back_populates="user")
     notifications = relationship("Notification", back_populates="user")
+    followed_authors = relationship(
+        "Author", secondary=author_followers, back_populates="followers"
+    )
 
     def to_dict(self):
         return {
@@ -31,8 +35,9 @@ class User(BaseModel):
             "preferences": self.preferences,
             "created_at": self.created_at.isoformat(),
             "permissions": self.permissions,
+            "followed_authors": [author.id for author in self.followed_authors],
         }
-    
+
     @property
     def is_admin(self):
         return False

@@ -1,16 +1,56 @@
 <script lang="ts">
-	import ArticleCard from '$lib/components/ui/cards/ArticleCard.svelte';
-	import Pagination from '$lib/components/ui/Pagination.svelte';
-	import type { PageData } from './$types';
+	import ArticleCard from "$lib/components/ui/cards/ArticleCard.svelte";
+	import Pagination from "$lib/components/ui/Pagination.svelte";
+	import type { PageData } from "./$types";
+	import { userStore } from "$lib/stores/authStore";
+	import { api } from "$lib/services/api";
+	import Button from "$lib/components/ui/Button.svelte";
 
 	let { data }: { data: PageData } = $props();
+
+	let isFollowing = $state(data.is_following);
+	let isLoadingFollow = $state(false);
+
+	async function handleToggleFollow() {
+		if (!data.author) return;
+		isLoadingFollow = true;
+
+		try {
+			const response = await api.post<{ is_following: boolean }>(
+				`/authors/${data.author.id}/toggle-follow`,
+				{},
+			);
+			isFollowing = response.is_following;
+			userStore.update((user) => {
+				if (!user || !data.author) return user;
+
+				const favs = user.followed_authors || [];
+
+				if (isFollowing) {
+					if (!favs.includes(data.author.id)) {
+						user.followed_authors = [...favs, data.author.id];
+					}
+				} else {
+					user.followed_authors = favs.filter(
+						(id) => id !== data.author.id,
+					);
+				}
+				return { ...user };
+			});
+		} catch (e: any) {
+			console.error("Помилка підписки:", e);
+			isFollowing = !isFollowing;
+		} finally {
+			isLoadingFollow = false;
+		}
+	}
 </script>
 
 <svelte:head>
 	<title>
-		{data.author ?
-			`${data.author.first_name} ${data.author.last_name}`
-			: 'Автор не знайдений'}
+		{data.author
+			? `${data.author.first_name} ${data.author.last_name}`
+			: "Автор не знайдений"}
 	</title>
 	{#if data.author?.bio}
 		<meta name="description" content={data.author.bio.substring(0, 150)} />
@@ -20,20 +60,34 @@
 <div class="max-w-4xl mx-auto">
 	{#if data.author}
 		<div class="mb-12 p-6 bg-white rounded-lg shadow-md">
-			<h1 class="text-4xl font-bold text-gray-900 mb-2">
-				{data.author.first_name} {data.author.last_name}
-			</h1>
-			<p class="text-lg text-gray-700">
-				{data.author.bio || 'Біографія автора відсутня.'}
-			</p>
-			<p class="text-sm text-gray-500 mt-4">
-				Всього опубліковано статей (на сайті): {data.total}
-			</p>
+			<div class="flex justify-between items-start">
+				<div>
+					<h1 class="text-4xl font-bold text-gray-900 mb-2">
+						{data.author.first_name} {data.author.last_name}
+					</h1>
+					<p class="text-lg text-gray-700">
+						{data.author.bio || 'Біографія автора відсутня.'}
+					</p>
+					<p class="text-sm text-gray-500 mt-4">
+						Всього опубліковано статей (на сайті): {data.total}
+					</p>
+				</div>
+				
+				{#if $userStore}
+					<Button
+						onclick={handleToggleFollow}
+						loading={isLoadingFollow}
+						class="!w-auto ml-4 {isFollowing ?
+							'!bg-gray-200 !text-gray-800 hover:!bg-gray-300'
+							: '!bg-green-600 hover:!bg-green-700'}"
+					>
+						{isFollowing ? 'Відстежується' : 'Слідкувати'}
+					</Button>
+				{/if}
+				</div>
 		</div>
 
-		<h2 class="text-3xl font-bold text-gray-900 mb-8">
-			Статті автора
-		</h2>
+		<h2 class="text-3xl font-bold text-gray-900 mb-8">Статті автора</h2>
 		{#if data.articles.length > 0}
 			<div class="space-y-6">
 				{#each data.articles as article (article.id)}

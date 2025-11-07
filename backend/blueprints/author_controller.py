@@ -1,5 +1,6 @@
-from flask import Blueprint, request, jsonify
-from middleware.auth_middleware import token_optional
+from flask import Blueprint, g, request, jsonify
+from models.user import User
+from middleware.auth_middleware import token_optional, token_required
 from repositories import get_author_repo, get_article_repo
 from services.article_service import ArticleService
 
@@ -56,3 +57,34 @@ def get_author_articles(current_user, author_id):
         )
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
+    
+@author_bp.route("/<int:author_id>/toggle-follow", methods=["POST"])
+@token_required
+def toggle_follow_author(current_user: User, author_id: int):
+    """
+    Додає або видаляє підписку на автора для поточного користувача.
+    Це "акуратна" версія, що працює з M2M-таблицею.
+    """
+    author_repo = get_author_repo()
+    author = author_repo.get_by(id=author_id)
+    if not author:
+        return jsonify({"msg": "Автора не знайдено"}), 404
+
+    is_following = False
+    
+    if author in current_user.followed_authors:
+        current_user.followed_authors.remove(author)
+        is_following = False
+    else:
+        current_user.followed_authors.append(author)
+        is_following = True
+
+    try:
+        g.db_session.commit() 
+        return jsonify({
+            "msg": "Статус підписки оновлено", 
+            "is_following": is_following
+        }), 200
+    except Exception as e:
+        g.db_session.rollback()
+        return jsonify({"msg": f"Помилка оновлення: {str(e)}"}), 500
