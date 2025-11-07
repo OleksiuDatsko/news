@@ -57,6 +57,26 @@
 				</div>
 			</a>
 		{/if}
+		<a
+			href="/profile/liked"
+			class="group bg-white p-6 rounded-lg shadow-lg hover:shadow-xl
+                    border border-gray-100 hover:border-indigo-500
+                    transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+		>
+			<h3
+				class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors duration-300"
+			>
+				Вподобані статті
+			</h3>
+			<p class="mt-1 text-sm text-gray-500">
+				Переглянути статті, які ви відмітили лайком.
+			</p>
+			<div
+				class="mt-4 text-sm font-medium text-indigo-600 group-hover:text-indigo-700"
+			>
+				Перейти &rarr;
+			</div>
+		</a>
 
 		<a
 			href="/profile/subscription"

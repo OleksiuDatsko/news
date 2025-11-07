@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { IArticle } from "$lib/types/article";
-	import { userStore } from "$lib/stores/authStore"; // 1. Імпорт store для перевірки прав
-	import { api } from "$lib/services/api"; // 2. Імпорт API для відправки запиту
+	import { userStore } from "$lib/stores/authStore";
+	import { api } from "$lib/services/api";
 
 	let { article }: { article: IArticle } = $props();
 
@@ -54,8 +54,6 @@
 			isLoading = false;
 		}
 	}
-
-	$inspect($userStore);
 </script>
 
 <article

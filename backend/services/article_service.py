@@ -77,7 +77,22 @@ class ArticleService:
 
         for article in articles:
             article_dict = article.to_dict(metadata=True)
-            article_dict["is_saved"] = True  # Всі статті в цьому списку збережені
+            article_dict["is_saved"] = True 
+            result.append(article_dict)
+
+        return result
+
+    def get_liked_articles(
+        self, user_id: int, page: int = 1, per_page: int = 10
+    ) -> List[Dict]:
+        """Отримує статті, які лайкнув користувач"""
+        articles = self.article_repo.get_liked_articles(user_id, page, per_page)
+        result = []
+
+        for article in articles:
+            article_dict = article.to_dict(metadata=True)
+            article_dict["is_liked"] = True
+            article_dict["is_saved"] = self.article_repo.is_article_saved(user_id, article.id)
             result.append(article_dict)
 
         return result
@@ -103,3 +118,22 @@ class ArticleService:
             return {"message": "Статтю вподобано", "is_liked": True}
         else:
             return {"message": "Лайк знято", "is_liked": False}
+
+    def get_recommended_articles(
+        self,
+        user_id: int,
+        page: int = 1,
+        per_page: int = 10,
+        favorite_category_slugs: list[str] = None,
+        filters: dict = None,
+    ):
+        """
+        Сервісний шар для виклику репозиторію рекомендованих статей.
+        """
+        return self.article_repo.get_recommended(
+            page=page,
+            per_page=per_page,
+            user_id=user_id,
+            favorite_category_slugs=favorite_category_slugs,
+            filters=filters,
+        )

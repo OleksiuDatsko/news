@@ -2,7 +2,7 @@ from typing import Optional
 from sqlalchemy import and_, desc, func, or_
 from sqlalchemy.orm import Session
 from repositories.repositories import BaseRepository
-from models.article import Article, ArticleInteraction
+from models.article import Article, ArticleInteraction, ArticleView
 from models.category import Category
 from models.author import Author
 from datetime import datetime, timedelta
@@ -20,7 +20,7 @@ class ArticleRepository(BaseRepository):
 
         if filters:
             if filters.get("status"):
-                query = query.filter_by(status=filters["status"])
+                query = query.filter_by(status=filters.get("status", "published"))
             if filters.get("category_id"):
                 query = query.filter_by(category_id=filters["category_id"])
             if filters.get("is_exclusive") is not None:
@@ -170,6 +170,27 @@ class ArticleRepository(BaseRepository):
             .all()
         )
 
+    def get_liked_articles(self, user_id: int, page: int = 1, per_page: int = 10):
+        """Отримує статті, які лайкнув користувач"""
+        query = (
+            self.db_session.query(Article)
+            .join(ArticleInteraction)
+            .filter(
+                and_(
+                    ArticleInteraction.user_id == user_id,
+                    ArticleInteraction.interaction_type == "like",
+                )
+            )
+        )
+
+        offset = (page - 1) * per_page
+        return (
+            query.order_by(desc(ArticleInteraction.created_at))
+            .offset(offset)
+            .limit(per_page)
+            .all()
+        )
+
     def is_article_saved(self, user_id: int, article_id: int):
         """Перевіряє, чи збережена стаття"""
         saved = (
@@ -230,3 +251,101 @@ class ArticleRepository(BaseRepository):
             self.db_session.add(interaction)
             self.db_session.commit()
             return True
+
+    def get_user_interaction_article_ids(self, user_id: int) -> set[int]:
+        """
+        Отримує ID всіх статей, з якими користувач взаємодіяв (лайк або перегляд).
+        """
+        liked_ids = (
+            self.db_session.query(ArticleInteraction.article_id)
+            .filter(
+                ArticleInteraction.user_id == user_id,
+                ArticleInteraction.interaction_type == "like",
+            )
+            .all()
+        )
+
+        viewed_ids = (
+            self.db_session.query(ArticleView.article_id)
+            .filter(ArticleView.user_id == user_id)
+            .all()
+        )
+
+        return {row[0] for row in liked_ids + viewed_ids}
+
+    def get_features_from_articles(self, article_ids: set[int]) -> dict:
+        """
+        На основі ID статей збирає "ознаки" для рекомендацій: ID категорій та ID авторів.
+        """
+        if not article_ids:
+            return {"category_ids": set(), "author_ids": set()}
+
+        articles = (
+            self.db_session.query(Article.category_id, Article.author_id)
+            .filter(Article.id.in_(article_ids))
+            .all()
+        )
+
+        category_ids = {row.category_id for row in articles if row.category_id}
+        author_ids = {row.author_id for row in articles if row.author_id}
+
+        return {"category_ids": category_ids, "author_ids": author_ids}
+
+    def get_recommended(
+        self,
+        page: int = 1,
+        per_page: int = 10,
+        user_id: int = None,
+        favorite_category_slugs: list[str] = None,
+        filters: dict = None,
+    ):
+        """
+        Отримує розширений список рекомендованих статей.
+        """
+        query = self.db_session.query(Article)
+
+        if filters:
+            if filters.get("status"):
+                query = query.filter_by(status=filters.get("status", "published"))
+            if filters.get("is_exclusive") is not None:
+                query = query.filter_by(is_exclusive=filters["is_exclusive"])
+
+        interacted_ids = self.get_user_interaction_article_ids(user_id)
+        if interacted_ids:
+            query = query.filter(Article.id.notin_(interacted_ids))
+
+        recommend_conditions = []
+
+        if favorite_category_slugs:
+            query = query.join(Article.category)
+            recommend_conditions.append(Category.slug.in_(favorite_category_slugs))
+
+        seed_features = self.get_features_from_articles(interacted_ids)
+        if seed_features["category_ids"]:
+            recommend_conditions.append(
+                Article.category_id.in_(seed_features["category_ids"])
+            )
+        if seed_features["author_ids"]:
+            recommend_conditions.append(
+                Article.author_id.in_(seed_features["author_ids"])
+            )
+
+        if recommend_conditions:
+            query = query.filter(or_(*recommend_conditions))
+        else:
+            if favorite_category_slugs:
+                query = query.join(Article.category).filter(
+                    Category.slug.in_(["fallback-slug"])
+                )
+            pass
+
+        offset = (page - 1) * per_page
+        total = query.count()
+        articles = (
+            query.order_by(desc(Article.created_at))
+            .offset(offset)
+            .limit(per_page)
+            .all()
+        )
+
+        return articles, total

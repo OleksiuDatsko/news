@@ -13,11 +13,14 @@ interface ArticleData {
 	total: number;
 }
 
-export const load: PageLoad = async ({ fetch, url }) => {	const page = url.searchParams.get('page') || '1';
+export const load: PageLoad = async ({ fetch, url }) => {
+	const page = url.searchParams.get('page') || '1';
+	const userId = get(userStore)?.id
 	try {
 		let data;
-		if (get(userStore)?.id) {
-			data = await api.get<ArticleData>(`/articles/recommended?page=${page}`, fetch); 
+		console.log(userId)
+		if (userId) {
+			data = await api.get<ArticleData>(`/articles/recommended?page=${page}`, fetch);
 		} else {
 			data = await api.get<ArticleData>(`/articles/?page=${page}`, fetch);
 		}
