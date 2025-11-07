@@ -167,7 +167,7 @@
                         <span>
                             Автор:
                             <a
-                                href="/author/{article.author.id}"
+                                href="/authors/{article.author.id}"
                                 class="font-medium text-gray-900 hover:underline"
                             >
                                 {article.author.first_name}

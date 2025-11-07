@@ -6,3 +6,4 @@ from .ad_controller import ad_bp
 from .comment_controller import comment_bp
 from .category_controller import category_bp
 from .notification_controller import notification_bp
+from .author_controller import author_bp

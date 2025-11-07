@@ -14,7 +14,8 @@ from blueprints import (
     ad_bp,
     comment_bp,
     category_bp,
-    notification_bp
+    notification_bp,
+    author_bp
 )
 from config import config
 
@@ -69,6 +70,7 @@ def create_app(config_name="default"):
     app.register_blueprint(comment_bp, url_prefix="/")
     app.register_blueprint(category_bp, url_prefix="/categories")
     app.register_blueprint(notification_bp, url_prefix="/notifications")
+    app.register_blueprint(author_bp, url_prefix="/authors")
     
     @app.route("/")
     def hello():
