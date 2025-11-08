@@ -4,6 +4,7 @@
     import { api } from "$lib/services/api";
     import AdCard from "$lib/components/ui/cards/AdCard.svelte";
     import CommentList from "$lib/components/comments/CommentList.svelte";
+    import { error } from "@sveltejs/kit";
 
     let { data }: { data: PageData } = $props();
 
@@ -202,9 +203,13 @@
                             <span class="font-semibold">{likesCount}</span>
                         </button>
                     {:else}
-                    <div class="rounded-md font-medium shadow-sm transition-colors bg-red-50 text-red-600 hover:bg-red-100 p-2 text-center">
-                        <span class="font-semibold">Вподобайки {likesCount}</span>
-                    </div>
+                        <div
+                            class="rounded-md font-medium shadow-sm transition-colors bg-red-50 text-red-600 hover:bg-red-100 p-2 text-center"
+                        >
+                            <span class="font-semibold"
+                                >Вподобайки {likesCount}</span
+                            >
+                        </div>
                     {/if}
                     {#if canSave}
                         <button
@@ -254,6 +259,16 @@
                 </div>
             </aside>
         {/if}
+    </div>
+{:else if data.error?.status == 403}
+    <div class="bg-white p-12 rounded-lg shadow-md text-center">
+        <h1 class="text-2xl font-bold text-red-600">Помилка</h1>
+        <p class="text-gray-600 mt-4">
+            Якщо хочете переглянути статтю, оформіть вищий рівень підписки.
+        </p>
+        <a href="/" class="text-indigo-600 hover:underline mt-4 block"
+            >Повернутися на головну</a
+        >
     </div>
 {:else}
     <div class="bg-white p-12 rounded-lg shadow-md text-center">

@@ -14,13 +14,15 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
 		return {
 			article: data,
-			ads: data.ads
+			ads: data.ads,
+			error: null
 		};
 	} catch (error) {
 		console.error('Failed to load article:', error);
 		return {
 			article: null,
-			ads: []
+			ads: [],
+			error: error
 		};
 	}
 };
