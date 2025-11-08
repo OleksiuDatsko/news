@@ -2,7 +2,6 @@
 	import type { IArticle } from "$lib/types/article";
 	import { userStore } from "$lib/stores/authStore";
 	import { api } from "$lib/services/api";
-    import { trackImpression } from "$lib/actions/trackImpression";
 
 	let { article }: { article: IArticle } = $props();
 
