@@ -183,24 +183,21 @@ def get_author_articles(current_admin, author_id):
             return jsonify({"msg": "Автора не знайдено"}), 404
 
         article_repo = get_article_repo()
-        author_articles = [
-            article
-            for article in article_repo.get_all()
-            if article.author_id == author_id
-        ]
+        db_filters = {"author_id": author_id}
+        if status:
+            db_filters["status"] = status
+        
+        author_articles = article_repo.get_all_by(**db_filters)
 
-        # Фільтрація за статусом
         if status:
             author_articles = [
                 article for article in author_articles if article.status == status
             ]
 
-        # Сортування за датою створення (найновіші спочатку)
         author_articles = sorted(
             author_articles, key=lambda x: x.created_at or "", reverse=True
         )
 
-        # Пагінація
         start = (page - 1) * per_page
         end = start + per_page
         paginated_articles = author_articles[start:end]

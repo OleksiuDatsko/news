@@ -7,7 +7,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
     const { id } = params;
     try {
         const author = await api.get<IAuthor>(`/admin/authors/${id}`, fetch);
-        const articles = await api.get<{articles: IArticle[]}>(`/admin/categories/${id}/articles`, fetch);
+        const articles = await api.get<{articles: IArticle[]}>(`/admin/authors/${id}/articles`, fetch);
         return {
             author,
             articles: articles.articles
