@@ -32,3 +32,15 @@ services:
     depends_on:
       - backend
       - frontend
+
+  cron-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.cron.dev
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env
+    restart: on-failure
+    stdin_open: true
+    tty: true

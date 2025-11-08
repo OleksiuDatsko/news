@@ -1,0 +1,1 @@
+* * * * * sh -c "cd /app && . /app/.env && /usr/local/bin/python -m tasks.daily_digest >> /var/log/cron.log 2>&1"
