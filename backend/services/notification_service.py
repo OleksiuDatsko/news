@@ -3,7 +3,7 @@ import json
 import os
 from typing import List
 from sqlalchemy.orm import Session
-from pywebpush import WebPusher, WebPushException
+from pywebpush import WebPusher, WebPushException, webpush
 from models.push_subscription import PushSubscription
 from models.article import Article
 from models.user import User
@@ -11,36 +11,27 @@ from models.notification import Notification
 
 VAPID_PUBLIC_KEY = os.environ.get("VAPID_PUBLIC_KEY")
 VAPID_PRIVATE_KEY = os.environ.get("VAPID_PRIVATE_KEY")
-VAPID_CLAIMS = {"sub": os.environ.get("VAPID_CLAIMS_EMAIL")}
+VAPID_CLAIMS = {"sub": os.environ.get("VAPID_ADMIN_EMAIL")}
 
 
-def send_web_push(subscription_info, payload):
-    """
-    Надсилає push-сповіщення, використовуючи клас WebPusher.
-    """
-    subscription_data = {
-        "endpoint": subscription_info.endpoint,
-        "keys": {"p256dh": subscription_info.p256dh, "auth": subscription_info.auth},
-    }
-
+def send_web_push(subscription_info, message_body):
     try:
-        pusher = WebPusher(
-            subscription_data,
+        webpush(
+            subscription_info={
+                "endpoint": subscription_info.endpoint,
+                "keys": {
+                    "p256dh": subscription_info.p256dh,
+                    "auth": subscription_info.auth,
+                },
+            },
+            data=json.dumps(message_body),
+            vapid_private_key=VAPID_PRIVATE_KEY,
+            vapid_claims=VAPID_CLAIMS,
         )
-        pusher.send(
-            data=json.dumps(payload)
-        )
-
-        print(f"[WebPush] Надіслано сповіщення на {subscription_info.endpoint} ({json.dumps(payload)})")
-
-    except WebPushException as ex:
-        print(f"[WebPush] Помилка WebPushException: {ex}")
-        if hasattr(ex, "response") and ex.response and ex.response.status_code == 410:
-            print("[WebPush] Підписка застаріла (410 Gone), її слід видалити.")
-
-    except Exception as e:
-        # 5. Ловимо будь-які інші помилки (як той TypeError)
-        print(f"[WebPush] НЕОЧІКУВАНА Помилка: {type(e).__name__} - {e}")
+        return True
+    except WebPushException as e:
+        print(f"Push failed: {e}")
+        return False
 
 
 class AbstractArticleObserver(ABC):
