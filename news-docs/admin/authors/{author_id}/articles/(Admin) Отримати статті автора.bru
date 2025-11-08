@@ -1,0 +1,31 @@
+meta {
+  name: (Admin) Отримати статті автора
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/admin/authors/:author_id/articles
+  body: none
+  auth: apikey
+}
+
+params:path {
+  author_id: 
+}
+
+params:query {
+  ~page: 1
+  ~per_page: 10
+  ~status: draft
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}

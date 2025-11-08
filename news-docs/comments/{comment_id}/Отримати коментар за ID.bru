@@ -1,0 +1,25 @@
+meta {
+  name: Отримати коментар за ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/comments/:comment_id
+  body: none
+  auth: apikey
+}
+
+params:path {
+  comment_id: 
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}

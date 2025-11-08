@@ -1,0 +1,21 @@
+meta {
+  name: Позначити всі як прочитані
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/notifications/read-all
+  body: none
+  auth: apikey
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}

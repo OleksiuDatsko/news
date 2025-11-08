@@ -1,0 +1,31 @@
+meta {
+  name: (Admin) Змінити пароль
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/admin/admin-users/:admin_id/change-password
+  body: json
+  auth: apikey
+}
+
+params:path {
+  admin_id: 
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}
+
+body:json {
+  {
+    "new_password": ""
+  }
+}

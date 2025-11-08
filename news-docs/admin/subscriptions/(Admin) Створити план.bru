@@ -1,0 +1,35 @@
+meta {
+  name: (Admin) Створити план
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/admin/subscriptions/
+  body: json
+  auth: apikey
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}
+
+body:json {
+  {
+    "name": "Premium Plan",
+    "permissions": {
+      "no_ads": true,
+      "exclusive_content": true,
+      "save_article": true,
+      "comment": true
+    },
+    "price_per_month": 100,
+    "description": "Full access"
+  }
+}

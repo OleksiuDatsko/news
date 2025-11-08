@@ -1,0 +1,15 @@
+meta {
+  name: Отримати автора
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/authors/:author_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  author_id: 
+}

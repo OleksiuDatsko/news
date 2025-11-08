@@ -1,0 +1,25 @@
+meta {
+  name: (Admin) Видалити план
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{baseUrl}}/admin/subscriptions/:plan_id
+  body: none
+  auth: apikey
+}
+
+params:path {
+  plan_id: 
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}

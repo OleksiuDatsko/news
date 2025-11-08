@@ -1,0 +1,21 @@
+meta {
+  name: Отримати непрочитані сповіщення
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/notifications/
+  body: none
+  auth: apikey
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}

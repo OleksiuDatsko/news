@@ -1,0 +1,26 @@
+meta {
+  name: Отримати рекомендовані статті
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/articles/recommended
+  body: none
+  auth: apikey
+}
+
+params:query {
+  ~page: 1
+  ~per_page: 5
+}
+
+headers {
+  access_token_cookie: {{apiKey}}
+}
+
+auth:apikey {
+  key: access_token_cookie
+  value: {{apiKey}}
+  placement: header
+}
