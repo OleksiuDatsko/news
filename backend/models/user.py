@@ -26,6 +26,8 @@ class User(BaseModel):
     followed_authors = relationship(
         "Author", secondary=author_followers, back_populates="followers"
     )
+    push_subscriptions = relationship("PushSubscription", back_populates="user")
+    
 
     def to_dict(self):
         return {
@@ -36,6 +38,7 @@ class User(BaseModel):
             "created_at": self.created_at.isoformat(),
             "permissions": self.permissions,
             "followed_authors": [author.id for author in self.followed_authors],
+            "push_subscriptions": [sub.to_dict() for sub in self.push_subscriptions],
         }
 
     @property

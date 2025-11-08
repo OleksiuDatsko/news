@@ -9,6 +9,8 @@ services:
       - ./backend:/app
     env_file:
       - ./backend/.env
+    environment:
+      - PYTHONUNBUFFERED=1
     restart: on-failure
   frontend:
     build:

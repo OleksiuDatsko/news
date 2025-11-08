@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from models.push_subscription import PushSubscription
 from middleware.auth_middleware import token_required
 from repositories import get_notification_repo
 
@@ -69,3 +70,33 @@ def get_all_notifications(current_user):
         "page": page,
         "per_page": per_page
     }), 200
+    
+@notification_bp.route("/subscribe", methods=["POST"])
+@token_required
+def subscribe_to_push(current_user):
+    """
+    Підписує користувача на push-сповіщення.
+    """
+    data = request.get_json()
+    if not data or not data.get("endpoint"):
+        return jsonify({"msg": "Необхідні дані підписки"}), 400
+
+    from flask import g    
+    existing = g.db_session.query(PushSubscription).filter_by(endpoint=data["endpoint"]).first()
+    if existing:
+        return jsonify({"msg": "Підписка вже існує"}), 200
+
+    try:
+        sub = PushSubscription(
+            user_id=current_user.id,
+            endpoint=data["endpoint"],
+            p256dh=data["keys"]["p256dh"],
+            auth=data["keys"]["auth"]
+        )
+        g.db_session.add(sub)
+        g.db_session.commit()
+        
+        return jsonify({"msg": "Підписка успішна"}), 201
+    except Exception as e:
+        g.db_session.rollback()
+        return jsonify({"msg": str(e)}), 500

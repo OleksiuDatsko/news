@@ -1,9 +1,46 @@
 from abc import ABC, abstractmethod
+import json
+import os
 from typing import List
 from sqlalchemy.orm import Session
+from pywebpush import WebPusher, WebPushException
+from models.push_subscription import PushSubscription
 from models.article import Article
 from models.user import User
 from models.notification import Notification
+
+VAPID_PUBLIC_KEY = os.environ.get("VAPID_PUBLIC_KEY")
+VAPID_PRIVATE_KEY = os.environ.get("VAPID_PRIVATE_KEY")
+VAPID_CLAIMS = {"sub": os.environ.get("VAPID_CLAIMS_EMAIL")}
+
+
+def send_web_push(subscription_info, payload):
+    """
+    Надсилає push-сповіщення, використовуючи клас WebPusher.
+    """
+    subscription_data = {
+        "endpoint": subscription_info.endpoint,
+        "keys": {"p256dh": subscription_info.p256dh, "auth": subscription_info.auth},
+    }
+
+    try:
+        pusher = WebPusher(
+            subscription_data,
+        )
+        pusher.send(
+            data=json.dumps(payload)
+        )
+
+        print(f"[WebPush] Надіслано сповіщення на {subscription_info.endpoint} ({json.dumps(payload)})")
+
+    except WebPushException as ex:
+        print(f"[WebPush] Помилка WebPushException: {ex}")
+        if hasattr(ex, "response") and ex.response and ex.response.status_code == 410:
+            print("[WebPush] Підписка застаріла (410 Gone), її слід видалити.")
+
+    except Exception as e:
+        # 5. Ловимо будь-які інші помилки (як той TypeError)
+        print(f"[WebPush] НЕОЧІКУВАНА Помилка: {type(e).__name__} - {e}")
 
 
 class AbstractArticleObserver(ABC):
@@ -80,6 +117,66 @@ class CategoryNotifier(AbstractArticleObserver):
             )
 
 
+class AuthorNotifier(AbstractArticleObserver):
+    def update(self, article: Article, db_session: Session):
+        """
+        Сповіщає користувачів, які підписані на автора цієї статті.
+        Використовує ефективний M2M-зв'язок 'author.followers'.
+        """
+        if not article.author:
+            print(f"[Observer] AuthorNotifier: У статті {article.id} відсутній автор.")
+            return
+
+        author = article.author
+        print(
+            f"[Observer] AuthorNotifier: Стаття {article.id} від автора {author.id}. Шукаю підписників..."
+        )
+
+        users_to_notify = author.followers.all()
+
+        if not users_to_notify:
+            print(
+                f"[Observer] AuthorNotifier: 0 підписників знайдено для автора {author.id}."
+            )
+            return
+
+        notifications = []
+        author_name = f"{author.first_name} {author.last_name}"
+        push_payload = {
+            "title": f"Нова стаття від {author_name}",
+            "body": f"«{article.title}»",
+            "url": f"/articles/{article.id}",
+        }
+        user_ids_to_notify = []
+
+        for user in users_to_notify:
+            notifications.append(
+                Notification(
+                    user_id=user.id,
+                    article_id=article.id,
+                    type="new_article_author",
+                    title=push_payload["title"],
+                    message=push_payload["body"],
+                )
+            )
+            user_ids_to_notify.append(user.id)
+
+        if notifications:
+            db_session.add_all(notifications)
+            print(
+                f"[Observer] AuthorNotifier: Створено {len(notifications)} сповіщень."
+            )
+        subscriptions = (
+            db_session.query(PushSubscription)
+            .filter(PushSubscription.user_id.in_(user_ids_to_notify))
+            .all()
+        )
+
+        print(f"[WebPush] Знайдено {len(subscriptions)} підписок для відправки.")
+        for sub in subscriptions:
+            send_web_push(sub, push_payload)
+
+
 class ArticleNotificationService:
     """
     Це наш Суб'єкт. Він керує списком спостерігачів і
@@ -111,50 +208,6 @@ class ArticleNotificationService:
                 observer.update(article, db_session)
             except Exception as e:
                 print(f"[Subject] ПОМИЛКА в {observer.__class__.__name__}: {e}")
-
-
-class AuthorNotifier(AbstractArticleObserver):
-    def update(self, article: Article, db_session: Session):
-        """
-        Сповіщає користувачів, які підписані на автора цієї статті.
-        Використовує ефективний M2M-зв'язок 'author.followers'.
-        """
-        if not article.author:
-            print(f"[Observer] AuthorNotifier: У статті {article.id} відсутній автор.")
-            return
-
-        author = article.author
-        print(
-            f"[Observer] AuthorNotifier: Стаття {article.id} від автора {author.id}. Шукаю підписників..."
-        )
-
-        users_to_notify = author.followers.all()
-
-        if not users_to_notify:
-            print(
-                f"[Observer] AuthorNotifier: 0 підписників знайдено для автора {author.id}."
-            )
-            return
-
-        notifications = []
-        author_name = f"{author.first_name} {author.last_name}"
-
-        for user in users_to_notify:
-            notifications.append(
-                Notification(
-                    user_id=user.id,
-                    article_id=article.id,
-                    type="new_article_author",
-                    title=f"Нова стаття від {author_name}",
-                    message=f"«{article.title}»",
-                )
-            )
-
-        if notifications:
-            db_session.add_all(notifications)
-            print(
-                f"[Observer] AuthorNotifier: Створено {len(notifications)} сповіщень."
-            )
 
 
 notification_service = ArticleNotificationService()
