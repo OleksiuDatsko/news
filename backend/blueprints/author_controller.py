@@ -58,6 +58,17 @@ def get_author_articles(current_user, author_id):
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
     
+@author_bp.route("/followed", methods=["GET"])
+@token_required
+def get_followed_authors(current_user: User):
+    """Отримує список авторів, на яких підписаний поточний користувач"""
+    try:
+        followed = current_user.followed_authors
+        result = [author.to_dict() for author in followed]
+        return jsonify({"authors": result, "total": len(result)}), 200
+    except Exception as e:
+        return jsonify({"msg": str(e)}), 500    
+
 @author_bp.route("/<int:author_id>/toggle-follow", methods=["POST"])
 @token_required
 def toggle_follow_author(current_user: User, author_id: int):
