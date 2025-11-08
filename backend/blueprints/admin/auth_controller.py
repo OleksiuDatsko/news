@@ -9,7 +9,7 @@ auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/register", methods=["POST"])
 @admin_token_required
-def register():
+def register(current_admin):
     data = request.get_json()
 
     if not data.get("email"):

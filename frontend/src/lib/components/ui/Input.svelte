@@ -6,7 +6,7 @@
 		required = false,
 		placeholder = '',
 		error = '',
-		value = $bindable(''),
+		value = $bindable(),
 		...rest
 	} = $props();
 </script>
