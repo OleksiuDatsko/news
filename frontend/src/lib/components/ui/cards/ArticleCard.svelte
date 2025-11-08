@@ -126,6 +126,11 @@
 			<span>{article.author.first_name} {article.author.last_name}</span>
 			<span class="text-gray-300 hidden md:inline">|</span>
 			<span>{formatDate(article.created_at)}</span>
+			<span class="text-gray-300 hidden md:inline">|</span>
+			<span class="flex items-center gap-1">
+				Переглядів:
+				{article.views_count}
+			</span>
 			{#if article.category}
 				<span class="text-gray-300 hidden md:inline">|</span>
 				<a

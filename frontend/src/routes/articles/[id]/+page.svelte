@@ -194,6 +194,10 @@
                         </span>
                         <span class="text-gray-400 hidden md:inline">|</span>
                         <span>{formatDate(article.created_at)}</span>
+                        <span class="flex items-center gap-1">
+                            Переглядів:
+                            {article.views_count}
+                        </span>
                     </div>
                     {#if canLike}
                         <button
