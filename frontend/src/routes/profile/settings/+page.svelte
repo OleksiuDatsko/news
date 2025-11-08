@@ -171,13 +171,12 @@
 
 				<div class="flex items-center justify-between">
 					<label for="authorNews" class="font-medium text-gray-700">
-						Новини від улюблених авторів (незабаром)
+						Новини від улюблених авторів
 					</label>
 					<input
 						id="authorNews"
 						type="checkbox"
 						bind:checked={authorNews}
-						disabled
 						class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded disabled:bg-gray-200"
 					/>
 				</div>
