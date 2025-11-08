@@ -173,6 +173,31 @@ def get_article(current_user, ads, article_id):
     except ValueError as e:
         return jsonify({"msg": str(e)}), 404
 
+@article_bp.route("/<int:article_id>/impression", methods=["POST"])
+@token_optional
+def record_article_impression(current_user, article_id):
+    """Реєструє показ картки статті."""
+    data = request.get_json() or {}
+    article_repo = get_article_repo()
+    article_service = ArticleService(article_repo)
+
+    try:
+        success = article_service.record_article_impression(
+            article_id=article_id,
+            user_id=current_user.id if current_user else None,
+            session_id=data.get("session_id"), # Можна додати для анонімів
+            ip_address=request.remote_addr,
+        )
+
+        if success:
+            return jsonify({"msg": "Показ статті зареєстровано"}), 200
+        else:
+            return jsonify({"msg": "Помилка при реєстрації показу"}), 500
+            
+    except ValueError as e:
+        return jsonify({"msg": str(e)}), 404
+    except Exception as e:
+        return jsonify({"msg": str(e)}), 500
 
 @article_bp.route("/<int:article_id>/save", methods=["POST"])
 @token_required

@@ -1,14 +1,15 @@
 from flask import g
-from repositories.notification import NotificationRepository
-from repositories.ad import AdRepository
-from repositories.ad_view import AdViewRepository
-from repositories.admin import AdminRepository
-from repositories.article import ArticleRepository
-from repositories.author import AuthorRepository
-from repositories.category import CategoryRepository
-from repositories.comment import CommentRepository
-from repositories.subscription import SubscriptionRepository
-from repositories.user import UserRepository
+from .article_view import ArticleViewRepository
+from .notification import NotificationRepository
+from .ad import AdRepository
+from .ad_view import AdViewRepository
+from .admin import AdminRepository
+from .article import ArticleRepository
+from .author import AuthorRepository
+from .category import CategoryRepository
+from .comment import CommentRepository
+from .subscription import SubscriptionRepository
+from .user import UserRepository
 
 def get_ad_repo() -> AdRepository:
     return AdRepository(g.db_session)
@@ -39,3 +40,6 @@ def get_user_repo() -> UserRepository:
 
 def get_notification_repo() -> NotificationRepository:
     return NotificationRepository(g.db_session)
+
+def get_article_view_repo() -> ArticleViewRepository:
+    return ArticleViewRepository(g.db_session)

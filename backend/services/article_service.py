@@ -1,3 +1,5 @@
+from datetime import datetime
+from repositories import get_article_view_repo
 from repositories.article import ArticleRepository
 from typing import List, Dict, Optional
 
@@ -137,3 +139,37 @@ class ArticleService:
             favorite_category_slugs=favorite_category_slugs,
             filters=filters,
         )
+    
+    def record_article_impression(
+        self,
+        article_id: int,
+        user_id: Optional[int] = None,
+        session_id: Optional[str] = None,
+        ip_address: Optional[str] = None,
+    ) -> bool:
+        """
+        Реєструє показ картки статті.
+        1. Збільшує лічильник views_count у статті.
+        2. Створює запис ArticleView.
+        """
+        article = self.article_repo.get_by(id=article_id)
+        if not article:
+            raise ValueError("Статтю не знайдено")
+
+        # 1. Збільшуємо загальний лічильник
+        self.article_repo.update(
+            article, {"views_count": (article.views_count or 0) + 1}
+        )
+
+        # 2. Створюємо запис про перегляд
+        article_view_repo = get_article_view_repo()
+        article_view_repo.create(
+            {
+                "article_id": article_id,
+                "user_id": user_id,
+                "session_id": session_id,
+                "ip_address": ip_address,
+                "viewed_at": datetime.now(),
+            }
+        )
+        return True

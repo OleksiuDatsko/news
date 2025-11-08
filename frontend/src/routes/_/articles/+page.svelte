@@ -142,6 +142,10 @@
 						>
 						<th
 							class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+							>Перегляди</th
+						>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
 							>Дата</th
 						>
 						<th
@@ -184,6 +188,11 @@
 								>
 									{article.status}
 								</span>
+							</td>
+							<td
+								class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
+							>
+								{article.views_count}
 							</td>
 							<td
 								class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"

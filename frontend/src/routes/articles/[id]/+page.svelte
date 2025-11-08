@@ -5,6 +5,7 @@
     import AdCard from "$lib/components/ui/cards/AdCard.svelte";
     import CommentList from "$lib/components/comments/CommentList.svelte";
     import { error } from "@sveltejs/kit";
+    import { onMount } from "svelte";
 
     let { data }: { data: PageData } = $props();
 
@@ -14,6 +15,22 @@
     let isSaved = $state(false);
     let isLiked = $state(false);
     let likesCount = $state(0);
+
+    onMount(() => {
+		if (article) {
+			const key = `viewed_article_${article.id}`;
+			if (!sessionStorage.getItem(key)) {
+				api.post(`/articles/${article.id}/impression`, {})
+					.then(() => {
+						sessionStorage.setItem(key, 'true');
+						console.log(`View tracked for article ${article.id}`);
+					})
+					.catch((err) => {
+						console.error('Failed to track article view', err);
+					});
+			}
+		}
+	});
 
     $effect(() => {
         isSaved = article?.is_saved ?? false;
