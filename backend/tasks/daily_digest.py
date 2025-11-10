@@ -65,11 +65,13 @@ def send_daily_digest_push():
                 print("Немає нових статей за останні 24 години.")
                 db_session.close()
                 return
+            
+            top_article = top_articles[0]
 
             push_payload = {
                 "title": "Ваш щоденний дайджест новин 📰",
-                "body": f"Головна історія: {top_articles.title}",
-                "url": f"/articles/{top_articles.id}",
+                "body": f"Головна історія: {top_article.title}",
+                "url": f"/articles/{top_article.id}",
             }
 
             notifications = []
@@ -77,7 +79,7 @@ def send_daily_digest_push():
                 notifications.append(
                     Notification(
                         user_id=user.id,
-                        article_id=top_articles.id,
+                        article_id=top_article.id,
                         type="daily_digest",
                         title=push_payload["title"],
                         message=push_payload["body"],
