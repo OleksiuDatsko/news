@@ -6,26 +6,23 @@ import { get } from 'svelte/store';
 import { goto } from '$app/navigation';
 
 export const load: PageLoad = async ({ fetch }) => {
-    const user = get(userStore);
+  const user = get(userStore);
 
-    if (!user?.permissions?.save_article) {
-        await goto('/profile');
-        return { articles: [] };
-    }
+  if (!user?.permissions?.save_article) {
+    await goto('/profile');
+    return { articles: [] };
+  }
 
-    try {
-        const savedArticles = await api.get<IArticle[]>(
-            '/articles/saved',
-            fetch
-        );
+  try {
+    const savedArticles = await api.get<IArticle[]>('/articles/saved', fetch);
 
-        return {
-            articles: savedArticles
-        };
-    } catch (error) {
-        console.error('Failed to load saved articles:', error);
-        return {
-            articles: []
-        };
-    }
+    return {
+      articles: savedArticles
+    };
+  } catch (error) {
+    console.error('Failed to load saved articles:', error);
+    return {
+      articles: []
+    };
+  }
 };

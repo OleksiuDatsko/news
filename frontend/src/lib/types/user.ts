@@ -11,8 +11,8 @@ export interface IUser {
   created_at: string;
   savedArticles?: number[];
   preferences: {
-    [key: string]: any
-  }
+    [key: string]: any;
+  };
   followed_authors?: number[];
   is_subscribed_to_newsletter: boolean;
 }
