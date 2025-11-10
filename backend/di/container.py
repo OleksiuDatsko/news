@@ -30,11 +30,9 @@ container = DIContainer()
 def configure_dependencies(app_config):
     """Конфігурація залежностей"""
 
-    
     database_type = getattr(app_config, "DATABASE_TYPE", "sqlite")
     database_url = getattr(app_config, "DATABASE_URL", "sqlite:///news.db")
 
-    
     if database_type.lower() == "sqlite":
         db_connection = SQLiteDatabaseConnection(database_url)
     elif database_type.lower() == "postgresql":

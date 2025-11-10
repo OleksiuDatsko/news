@@ -3,6 +3,7 @@ from sqlalchemy import desc, update
 from .repositories import BaseRepository
 from models.notification import Notification
 
+
 class NotificationRepository(BaseRepository):
     def __init__(self, db_session: Session):
         super().__init__(db_session, Notification)
@@ -24,12 +25,12 @@ class NotificationRepository(BaseRepository):
             .filter_by(user_id=user_id)
             .order_by(desc(self.model.created_at))
         )
-        
+
         total = query.count()
-        
+
         offset = (page - 1) * per_page
         notifications = query.offset(offset).limit(per_page).all()
-        
+
         return notifications, total
 
     def mark_as_read(self, notification_id: int, user_id: int):
@@ -44,6 +45,6 @@ class NotificationRepository(BaseRepository):
         self.db_session.query(self.model).filter_by(
             user_id=user_id, is_read=False
         ).update({"is_read": True})
-        
+
         self.db_session.commit()
         return True

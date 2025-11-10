@@ -15,7 +15,6 @@ class User(BaseModel):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
-    
     article_views = relationship("ArticleView", back_populates="user")
     comments = relationship("Comment", back_populates="user")
     interactions = relationship("ArticleInteraction", back_populates="user")
@@ -27,7 +26,6 @@ class User(BaseModel):
         "Author", secondary=author_followers, back_populates="followers"
     )
     push_subscriptions = relationship("PushSubscription", back_populates="user")
-    
 
     def to_dict(self):
         return {
@@ -39,6 +37,7 @@ class User(BaseModel):
             "permissions": self.permissions,
             "followed_authors": [author.id for author in self.followed_authors],
             "push_subscriptions": [sub.to_dict() for sub in self.push_subscriptions],
+            "is_subscribed_to_newsletter": self.is_subscribed_to_newsletter,
         }
 
     @property
@@ -51,3 +50,10 @@ class User(BaseModel):
         if not active_subscription:
             return []
         return active_subscription[0].plan.permissions
+
+    @property
+    def is_subscribed_to_newsletter(self):
+        for sub in self.newsletter_subs:
+            if sub.type == "general_digest" and sub.is_active:
+                return True
+        return False

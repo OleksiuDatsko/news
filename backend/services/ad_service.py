@@ -1,4 +1,3 @@
-
 from datetime import datetime
 from typing import List, Optional, Dict
 from sqlalchemy.orm import Session
@@ -63,9 +62,7 @@ class AdService:
         strategy: str = "default",
     ) -> Dict[str, List]:
         if user_permissions and not self.should_show_ads(user_permissions):
-            return {
-                p: [] for p in placements
-            }  
+            return {p: [] for p in placements}
 
         result = {}
 
@@ -99,15 +96,13 @@ class AdService:
             True якщо показ зареєстровано успішно
         """
         try:
-            
+
             ad = self.ad_repo.get_by(id=ad_id)
             if not ad:
                 raise ValueError(f"Рекламне оголошення з ID {ad_id} не знайдено")
 
-            
             self.ad_repo.update(ad, {"impressions_count": ad.impressions_count + 1})
 
-            
             from repositories import get_ad_view_repo
 
             ad_view_repo = get_ad_view_repo()
@@ -132,7 +127,6 @@ class AdService:
             if not ad:
                 raise ValueError(f"Рекламне оголошення з ID {ad_id} не знайдено")
 
-            
             self.ad_repo.update(ad, {"clicks_count": ad.clicks_count + 1})
 
             return True

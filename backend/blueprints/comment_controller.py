@@ -5,6 +5,7 @@ from services.comment_service import CommentService
 
 comment_bp = Blueprint("comment", __name__)
 
+
 @comment_bp.route("/articles/<int:article_id>/comments", methods=["GET"])
 def get_comments(article_id):
     """Отримує коментарі для статті"""
@@ -20,6 +21,7 @@ def get_comments(article_id):
         return jsonify({"msg": str(e)}), 404
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
+
 
 @comment_bp.route("/articles/<int:article_id>/comments", methods=["POST"])
 @token_required
@@ -41,7 +43,8 @@ def create_comment(current_user, article_id):
         return jsonify({"msg": str(e)}), 400
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
-    
+
+
 @comment_bp.route("/comments/<int:comment_id>", methods=["GET"])
 @token_required
 def get_comment_by_id(current_user, comment_id):
@@ -55,6 +58,7 @@ def get_comment_by_id(current_user, comment_id):
         return jsonify({"msg": str(e)}), 404
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
+
 
 @comment_bp.route("/comments/<int:comment_id>", methods=["PUT"])
 @token_required
@@ -78,6 +82,7 @@ def update_comment(current_user, comment_id):
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
 
+
 @comment_bp.route("/comments/<int:comment_id>", methods=["DELETE"])
 @token_required
 def delete_comment(current_user, comment_id):
@@ -85,7 +90,9 @@ def delete_comment(current_user, comment_id):
     service = CommentService(get_comment_repo(), get_article_repo())
 
     try:
-        result = service.delete_comment(current_user.id, comment_id, current_user.is_admin)
+        result = service.delete_comment(
+            current_user.id, comment_id, current_user.is_admin
+        )
         return jsonify(result), 200
     except ValueError as e:
         return jsonify({"msg": str(e)}), 404

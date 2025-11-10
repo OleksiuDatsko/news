@@ -173,6 +173,7 @@ def get_article(current_user, ads, article_id):
     except ValueError as e:
         return jsonify({"msg": str(e)}), 404
 
+
 @article_bp.route("/<int:article_id>/impression", methods=["POST"])
 @token_optional
 def record_article_impression(current_user, article_id):
@@ -185,7 +186,7 @@ def record_article_impression(current_user, article_id):
         success = article_service.record_article_impression(
             article_id=article_id,
             user_id=current_user.id if current_user else None,
-            session_id=data.get("session_id"), 
+            session_id=data.get("session_id"),
             ip_address=request.remote_addr,
         )
 
@@ -193,11 +194,12 @@ def record_article_impression(current_user, article_id):
             return jsonify({"msg": "Показ статті зареєстровано"}), 200
         else:
             return jsonify({"msg": "Помилка при реєстрації показу"}), 500
-            
+
     except ValueError as e:
         return jsonify({"msg": str(e)}), 404
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
+
 
 @article_bp.route("/<int:article_id>/save", methods=["POST"])
 @token_required
@@ -279,6 +281,7 @@ def get_saved_articles(current_user):
         return jsonify(articles), 200
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
+
 
 @article_bp.route("/liked", methods=["GET"])
 @token_required

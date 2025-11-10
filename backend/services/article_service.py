@@ -79,7 +79,7 @@ class ArticleService:
 
         for article in articles:
             article_dict = article.to_dict(metadata=True)
-            article_dict["is_saved"] = True 
+            article_dict["is_saved"] = True
             result.append(article_dict)
 
         return result
@@ -94,7 +94,9 @@ class ArticleService:
         for article in articles:
             article_dict = article.to_dict(metadata=True)
             article_dict["is_liked"] = True
-            article_dict["is_saved"] = self.article_repo.is_article_saved(user_id, article.id)
+            article_dict["is_saved"] = self.article_repo.is_article_saved(
+                user_id, article.id
+            )
             result.append(article_dict)
 
         return result
@@ -139,7 +141,7 @@ class ArticleService:
             favorite_category_slugs=favorite_category_slugs,
             filters=filters,
         )
-    
+
     def record_article_impression(
         self,
         article_id: int,
@@ -156,12 +158,10 @@ class ArticleService:
         if not article:
             raise ValueError("Статтю не знайдено")
 
-        
         self.article_repo.update(
             article, {"views_count": (article.views_count or 0) + 1}
         )
 
-        
         article_view_repo = get_article_view_repo()
         article_view_repo.create(
             {

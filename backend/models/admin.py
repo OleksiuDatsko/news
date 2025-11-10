@@ -17,6 +17,7 @@ class Admin(BaseModel):
             "email": self.email,
             "created_at": self.created_at,
         }
+
     @property
     def is_admin(self):
         return True

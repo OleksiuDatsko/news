@@ -16,7 +16,6 @@ def get_ads(current_user):
     ad_repo = get_ad_repo()
     ad_service = AdService(ad_repo)
 
-    
     user_permissions = current_user.permissions if current_user else {}
 
     try:
@@ -48,7 +47,6 @@ def get_ad_by_id(current_user, ad_id):
     ad_repo = get_ad_repo()
     ad_service = AdService(ad_repo)
 
-    
     user_permissions = current_user.permissions if current_user else {}
 
     try:

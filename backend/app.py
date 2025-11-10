@@ -15,7 +15,7 @@ from blueprints import (
     comment_bp,
     category_bp,
     notification_bp,
-    author_bp
+    author_bp,
 )
 from config import config
 
@@ -29,7 +29,7 @@ def create_app(config_name="default"):
     config_class = config.get(config_name, config["default"])
     app.config.from_object(config_class)
     app.config["SQLALCHEMY_ECHO"] = False
-    
+
     @app.before_request
     def attach_services():
         """
@@ -46,7 +46,7 @@ def create_app(config_name="default"):
         Виконується після кожного запиту.
         Закриває сесію і повертає з'єднання в пул.
         """
-        db_session = g.pop('db_session', None)
+        db_session = g.pop("db_session", None)
         if db_session is not None:
             db_session.close()
 
@@ -71,7 +71,7 @@ def create_app(config_name="default"):
     app.register_blueprint(category_bp, url_prefix="/categories")
     app.register_blueprint(notification_bp, url_prefix="/notifications")
     app.register_blueprint(author_bp, url_prefix="/authors")
-    
+
     @app.route("/")
     def hello():
         return {"message": "News API is running!", "config": config_name}

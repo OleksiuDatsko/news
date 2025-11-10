@@ -2,11 +2,14 @@ from repositories.comment import CommentRepository
 from repositories.article import ArticleRepository
 from typing import List, Dict
 
+
 class CommentService:
-    def __init__(self, comment_repo: CommentRepository, article_repo: ArticleRepository):
+    def __init__(
+        self, comment_repo: CommentRepository, article_repo: ArticleRepository
+    ):
         self.comment_repo = comment_repo
         self.article_repo = article_repo
-        
+
     def get_comment_by_id(self, comment_id: int) -> Dict:
         """Отримує коментар за ID"""
         comment = self.comment_repo.get_by(id=comment_id)
@@ -14,15 +17,17 @@ class CommentService:
             raise ValueError("Коментар не знайдено")
         return comment.to_dict()
 
-    def get_comments_for_article(self, article_id: int, page: int = 1, per_page: int = 10) -> List[Dict]:
+    def get_comments_for_article(
+        self, article_id: int, page: int = 1, per_page: int = 10
+    ) -> List[Dict]:
         """Отримує список коментарів для статті"""
-        
+
         article = self.article_repo.get_by_id(article_id)
         if not article:
             raise ValueError("Статтю не знайдено")
-            
+
         comments = self.comment_repo.get_by_article(article_id, page, per_page)
-        
+
         return [comment.to_dict() for comment in comments]
 
     def create_comment(self, user_id: int, article_id: int, text: str) -> Dict:

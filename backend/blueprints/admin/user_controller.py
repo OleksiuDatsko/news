@@ -49,7 +49,6 @@ def get_user(current_admin, user_id):
 
         user_data = user.to_dict()
 
-        
         subscription_service = SubscriptionService(get_subscription_repo())
         current_subscription = subscription_service.get_current_subscription(user_id)
         user_data["current_subscription"] = (
@@ -77,7 +76,7 @@ def update_user(current_admin, user_id):
         updatable_fields = ["username", "email", "preferences"]
         for field in updatable_fields:
             if field in data:
-                
+
                 if field in ["email", "username"]:
                     existing = user_repo.get_by(**{field: data.get(field)})
                     if existing and existing.id != user_id:

@@ -5,6 +5,7 @@ from repositories import get_user_repo, get_admin_repo
 from services.auth.admin import AdminAuthService
 from services.auth.user import UserAuthService
 
+
 def token_required(f):
     """Декоратор для перевірки JWT токену"""
 
@@ -16,7 +17,9 @@ def token_required(f):
         if jwt.get("type") == "user":
             current_user = UserAuthService(get_user_repo()).get_current_user(current_id)
         elif jwt.get("type") == "admin":
-            current_user = AdminAuthService(get_admin_repo()).get_current_admin(current_id)
+            current_user = AdminAuthService(get_admin_repo()).get_current_admin(
+                current_id
+            )
 
         return f(current_user, *args, **kwargs)
 
@@ -31,9 +34,7 @@ def permission_required(*permissions):
         def decorated(current_user, *args, **kwargs):
             if current_user.is_admin:
                 return (
-                    jsonify(
-                        {"msg": "Адмін не має доступу"}
-                    ),
+                    jsonify({"msg": "Адмін не має доступу"}),
                     418,
                 )
             user_permissions = current_user.permissions

@@ -1,4 +1,6 @@
-from flask import Blueprint, request, jsonify, make_response, render_template
+from flask import Blueprint, g, request, jsonify, make_response, render_template
+from middleware.auth_middleware import token_required
+from models.newsletter import NewsletterSubscription
 from services.subscribtion_service import SubscriptionService
 from repositories import get_subscription_repo, get_user_repo
 from services.auth.user import UserAuthService as AuthService
@@ -108,25 +110,54 @@ def me():
 
 
 @auth_bp.route("/me/preferences", methods=["PUT"])
-@jwt_required()
-def update_preferences():
+@token_required
+def update_preferences(current_user):
     """Оновлює налаштування (preferences) поточного користувача"""
-    current_user_id = get_jwt_identity()
     data = request.get_json()
 
     if data is None:
         return jsonify({"msg": "Тіло запиту не може бути порожнім"}), 400
 
     user_repo = get_user_repo()
-    auth_service = AuthService(user_repo)
-    current_user = auth_service.get_current_user(current_user_id)
-
     try:
         updated_user = user_repo.update(current_user, {"preferences": data})
-        
+
         return jsonify({"user": updated_user.to_dict()}), 200
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
+
+
+@auth_bp.route("/me/newsletter/toggle", methods=["POST"])
+@token_required
+def toggle_newsletter_subscription(current_user):
+    """
+    Вмикає або вимикає загальну email-розсилку для користувача.
+    """
+    if current_user.is_admin:
+        return jsonify({"msg": "Адміністратор не може підписатися на розсилку"}), 400
+
+    sub = (
+        g.db_session.query(NewsletterSubscription)
+        .filter_by(user_id=current_user.id, type="general_digest")
+        .first()
+    )
+
+    new_state = True
+    if sub:
+        sub.is_active = not sub.is_active
+        new_state = sub.is_active
+    else:
+        sub = NewsletterSubscription(
+            user_id=current_user.id, type="general_digest", is_active=True
+        )
+        g.db_session.add(sub)
+
+    try:
+        g.db_session.commit()
+        return jsonify({"is_subscribed": new_state}), 200
+    except Exception as e:
+        g.db_session.rollback()
+        return jsonify({"msg": f"Помилка бази даних: {str(e)}"}), 500
 
 
 @auth_bp.route("/logout", methods=["POST"])

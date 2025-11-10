@@ -19,7 +19,6 @@ def get_all_ads(current_admin):
         ad_repo = get_ad_repo()
         ads = ad_repo.get_all()
 
-        
         if status == "active":
             ads = [
                 ad
@@ -31,14 +30,11 @@ def get_all_ads(current_admin):
         elif status == "expired":
             ads = [ad for ad in ads if ad.end_date and ad.end_date < datetime.now()]
 
-        
         if ad_type:
             ads = [ad for ad in ads if ad.ad_type == ad_type]
 
-        
         ads = sorted(ads, key=lambda x: x.id, reverse=True)
 
-        
         start = (page - 1) * per_page
         end = start + per_page
         paginated_ads = ads[start:end]
@@ -47,7 +43,6 @@ def get_all_ads(current_admin):
         for ad in paginated_ads:
             ad_data = ad.to_dict()
 
-            
             ad_data["ctr"] = (
                 round((ad.clicks_count / ad.impressions_count * 100), 2)
                 if ad.impressions_count > 0
@@ -102,7 +97,6 @@ def create_ad(current_admin):
     try:
         ad_repo = get_ad_repo()
 
-        
         start_date = None
         end_date = None
 
@@ -146,7 +140,6 @@ def get_ad(current_admin, ad_id):
 
         ad_data = ad.to_dict()
 
-        
         ad_data["ctr"] = (
             round((ad.clicks_count / ad.impressions_count * 100), 2)
             if ad.impressions_count > 0
@@ -160,7 +153,6 @@ def get_ad(current_admin, ad_id):
         if ad.end_date and ad.end_date < datetime.now():
             ad_data["status"] = "expired"
 
-        
         ad_data["recent_performance"] = {
             "daily_impressions": (
                 ad.impressions_count // 30 if ad.impressions_count > 0 else 0
@@ -204,7 +196,6 @@ def update_ad(current_admin, ad_id):
                         )
                 update_data[field] = data.get(field)
 
-        
         if "start_date" in data:
             if data.get("start_date"):
                 update_data["start_date"] = datetime.fromisoformat(
@@ -302,7 +293,6 @@ def get_ads_statistics(current_admin):
             else 0
         )
 
-        
         ad_types_stats = {}
         for ad in ads:
             if ad.ad_type not in ad_types_stats:
@@ -311,7 +301,6 @@ def get_ads_statistics(current_admin):
             ad_types_stats[ad.ad_type]["impressions"] += ad.impressions_count
             ad_types_stats[ad.ad_type]["clicks"] += ad.clicks_count
 
-        
         for ad_type in ad_types_stats:
             impressions = ad_types_stats[ad_type]["impressions"]
             clicks = ad_types_stats[ad_type]["clicks"]
@@ -321,7 +310,6 @@ def get_ads_statistics(current_admin):
 
         stats["by_type"] = ad_types_stats
 
-        
         top_ads = sorted(
             [ad for ad in ads if ad.impressions_count > 0],
             key=lambda x: x.clicks_count / x.impressions_count,

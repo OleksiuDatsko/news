@@ -14,6 +14,7 @@ from models.user import User
 from models.article import Article
 from models.push_subscription import PushSubscription
 from models.notification import Notification
+from models.newsletter import NewsletterSubscription
 from database import IDatabaseConnection
 
 
@@ -23,74 +24,82 @@ VAPID_CLAIMS = {"sub": os.environ.get("VAPID_ADMIN_EMAIL")}
 
 app = create_app()
 
-def send_daily_digest():
+
+def send_daily_digest_push():
     """
-    Збирає та надсилає щоденний дайджест користувачам,
-    які на нього підписані.
-    
-    Ця функція призначена для запуску 1 раз на день 
-    за допомогою планувальника.
-    """    
+    Збирає та надсилає щоденний дайджест PUSH-СПОВІЩЕНЬ користувачам,
+    які на нього підписані (в налаштуваннях профілю).
+    """
     with app.app_context():
-        print(f"[{datetime.now()}] Запуск завдання 'send_daily_digest'...")
-        
+        print(f"[{datetime.now()}] Запуск завдання 'send_daily_digest_PUSH'...")
+
         db_session: Session = app.container.resolve(IDatabaseConnection).get_session()
-        
+
         try:
-            users_to_notify = db_session.query(User).filter(
-                User.preferences["dailyDigest"].as_boolean() == True
-            ).all()
-            
+            users_to_notify = (
+                db_session.query(User)
+                .filter(User.preferences["dailyDigest"].as_boolean() == True)
+                .all()
+            )
+
             if not users_to_notify:
-                print("Користувачів для дайджесту не знайдено.")
+                print("Користувачів для PUSH-дайджесту не знайдено.")
+                db_session.close()
                 return
 
-            user_ids = [user.id for user in users_to_notify]
-            print(f"Знайдено {len(user_ids)} користувачів для розсилки.")
+            print(f"Знайдено {len(users_to_notify)} користувачів для розсилки.")
 
             twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
-            top_articles = db_session.query(Article).filter(
-                Article.status == 'published',
-                Article.created_at >= twenty_four_hours_ago
-            ).order_by(
-                desc(Article.views_count)
-            ).limit(5).all()
+            top_articles = (
+                db_session.query(Article)
+                .filter(
+                    Article.status == "published",
+                    Article.created_at >= twenty_four_hours_ago,
+                )
+                .order_by(desc(Article.views_count))
+                .limit(5)
+                .all()
+            )
 
             if not top_articles:
                 print("Немає нових статей за останні 24 години.")
+                db_session.close()
                 return
 
-            top_story = top_articles[0]
             push_payload = {
                 "title": "Ваш щоденний дайджест новин 📰",
-                "body": f"Головна історія: {top_story.title}",
-                "url": f"/articles/{top_story.id}"
+                "body": f"Головна історія: {top_articles.title}",
+                "url": f"/articles/{top_articles.id}",
             }
-            
+
             notifications = []
             for user in users_to_notify:
                 notifications.append(
                     Notification(
                         user_id=user.id,
-                        article_id=top_story.id,
+                        article_id=top_articles.id,
                         type="daily_digest",
                         title=push_payload["title"],
                         message=push_payload["body"],
                     )
                 )
                 print(f"Створено сповіщення для користувача {user.id}.")
-            
+
             if notifications:
                 db_session.add_all(notifications)
                 print(f"[Observer]: Створено {len(notifications)} сповіщень в БД.")
                 db_session.commit()
 
-            subscriptions = db_session.query(PushSubscription).filter(
-                PushSubscription.user_id.in_(user_ids)
-            ).all()
+            subscriptions = (
+                db_session.query(PushSubscription)
+                .filter(
+                    PushSubscription.user_id.in_([user.id for user in users_to_notify])
+                )
+                .all()
+            )
 
             print(f"Надсилання дайджесту на {len(subscriptions)} пристроїв...")
-            
+
             sent_count = 0
             for sub in subscriptions:
                 try:
@@ -109,14 +118,55 @@ def send_daily_digest():
                     sent_count += 1
                 except WebPushException as e:
                     print(f"Push failed: {e}")
-            
-            print(f"Успішно надіслано {sent_count} сповіщень.")
+
+            print(f"Успішно надіслано {sent_count} PUSH-сповіщень.")
 
         except Exception as e:
-            print(f"ПОМИЛКА під час виконання daily_digest: {e}")
+            print(f"ПОМИЛКА під час виконання daily_digest_PUSH: {e}")
         finally:
-            db_session.close()
-            print("Завдання 'send_daily_digest' завершено.")
+            if db_session.is_active:
+                db_session.close()
+            print("Завдання 'send_daily_digest_PUSH' завершено.")
+
+
+def send_daily_digest_email_stub():
+    with app.app_context():
+        print(f"[{datetime.now()}] Запуск завдання 'send_daily_digest_EMAIL_STUB'...")
+
+        db_session: Session = app.container.resolve(IDatabaseConnection).get_session()
+
+        try:
+            active_email_subs = (
+                db_session.query(NewsletterSubscription)
+                .filter_by(type="general_digest", is_active=True)
+                .all()
+            )
+
+            if not active_email_subs:
+                print("Користувачів для EMAIL-розсилки не знайдено.")
+                db_session.close()
+                return
+
+            user_ids = [sub.user_id for sub in active_email_subs]
+            users = db_session.query(User).filter(User.id.in_(user_ids)).all()
+
+            print(f"Знайдено {len(users)} користувачів для EMAIL-розсилки.")
+
+            for user in users:
+                print(
+                    f"  [ЗАГЛУШКА]: Надсилаємо email-дайджест користувачу {user.email}..."
+                )
+
+            print(f"Успішно 'надіслано' {len(users)} email-дайджестів.")
+
+        except Exception as e:
+            print(f"ПОМИЛКА під час виконання email_stub: {e}")
+        finally:
+            if db_session.is_active:
+                db_session.close()
+            print("Завдання 'send_daily_digest_EMAIL_STUB' завершено.")
+
 
 if __name__ == "__main__":
-    send_daily_digest()
+    send_daily_digest_push()
+    send_daily_digest_email_stub()

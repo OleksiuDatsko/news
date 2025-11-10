@@ -2,6 +2,7 @@ from repositories.repositories import BaseRepository
 from models.article import ArticleView
 from sqlalchemy.orm import Session
 
+
 class ArticleViewRepository(BaseRepository):
     def __init__(self, db_session: Session):
         super().__init__(db_session, ArticleView)

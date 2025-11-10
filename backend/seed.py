@@ -54,17 +54,72 @@ def random_username(base="User"):
 
 def random_name():
     """Генерує випадкове ім'я."""
-    first_names = ["Олена", "Сергій", "Максим", "Юлія", "Ірина", "Павло", "Андрій", 
-                   "Катерина", "Софія", "Денис", "Вадим", "Марина", "Ігор", "Владислав",
-                   "Гордій", "Ростислав", "Дарія", "Михайло", "Анна", "Іван", "Марія",
-                   "Дмитро", "Олга", "Віктор", "Ліза", "Роман", "Наталія", "Костянтин",
-                   "Ірина", "Павло", "Юлія", "Денис", "Анастасія", "Євген"]
-    
-    last_names = ["Петренко", "Коваленко", "Ковальчук", "Іванова", "Шевченко", "Сидоренко",
-                  "Захарчук", "Бондаренко", "Мельник", "Литвин", "Марченко", "Гончаренко",
-                  "Іванець", "Кравченко", "Остапенко", "Сокур", "Забара", "Чорна", "Білий",
-                  "Смик", "Гринь", "Павлів", "Тарас", "Волощук", "Лютий", "Кучер"]
-    
+    first_names = [
+        "Олена",
+        "Сергій",
+        "Максим",
+        "Юлія",
+        "Ірина",
+        "Павло",
+        "Андрій",
+        "Катерина",
+        "Софія",
+        "Денис",
+        "Вадим",
+        "Марина",
+        "Ігор",
+        "Владислав",
+        "Гордій",
+        "Ростислав",
+        "Дарія",
+        "Михайло",
+        "Анна",
+        "Іван",
+        "Марія",
+        "Дмитро",
+        "Олга",
+        "Віктор",
+        "Ліза",
+        "Роман",
+        "Наталія",
+        "Костянтин",
+        "Ірина",
+        "Павло",
+        "Юлія",
+        "Денис",
+        "Анастасія",
+        "Євген",
+    ]
+
+    last_names = [
+        "Петренко",
+        "Коваленко",
+        "Ковальчук",
+        "Іванова",
+        "Шевченко",
+        "Сидоренко",
+        "Захарчук",
+        "Бондаренко",
+        "Мельник",
+        "Литвин",
+        "Марченко",
+        "Гончаренко",
+        "Іванець",
+        "Кравченко",
+        "Остапенко",
+        "Сокур",
+        "Забара",
+        "Чорна",
+        "Білий",
+        "Смик",
+        "Гринь",
+        "Павлів",
+        "Тарас",
+        "Волощук",
+        "Лютий",
+        "Кучер",
+    ]
+
     return random.choice(first_names), random.choice(last_names)
 
 
@@ -158,50 +213,63 @@ def random_article_title(category_name):
             "Нобелівська премія за {topic}",
         ],
     }
-    
+
     topics = {
         "politika": ["санкції", "вибори", "дипломатія", "реформи", "альянси", "угоди"],
         "tehnologii": ["ШІ", "блокчейн", "квантові", "5G", "AR", "роботи"],
         "sport": ["футбол", "теніс", "велоспорт", "хокей", "плавання", "гімнастика"],
-        "ekonomika": ["крипто", "акції", "нерухомість", "стартапи", "інвестиції", "банки"],
+        "ekonomika": [
+            "крипто",
+            "акції",
+            "нерухомість",
+            "стартапи",
+            "інвестиції",
+            "банки",
+        ],
         "kultura": ["театр", "кіно", "музика", "мистецтво", "танець", "література"],
         "podorozhi": ["Карпати", "Львів", "Балі", "Венеція", "Португалія", "Мальдіви"],
         "zdorovya": ["вакцини", "фітнес", "медитація", "сон", "харчування", "стрес"],
         "nauka": ["CRISPR", "Марс", "чорні дири", "climat", "ДНК", "енергія"],
     }
-    
+
     template = random.choice(templates.get(category_name, templates["nauka"]))
     topic = random.choice(topics.get(category_name, topics["nauka"]))
-    
+
     return template.format(topic=topic)
 
 
 def random_article_content():
     """Генерує випадковий вміст статті."""
-    intro = random.choice([
-        "Новітні дослідження показують",
-        "Експерти передбачають",
-        "На думку аналітиків,",
-        "Останні дані свідчать про",
-        "Проведене дослідження виявило",
-    ])
-    
-    body = random.choice([
-        "що ця тема набирає неймовірної популярності.",
-        "значні зміни у цій індустрії.",
-        "революційні підходи до розв'язання проблеми.",
-        "глибокі зміни у суспільстві.",
-        "новий рівень розвитку та інновацій.",
-    ])
-    
-    conclusion = random.choice([
-        "Очікуємо подальшого розвитку ситуації.",
-        "Це змінить світ у найближчому майбутньому.",
-        "Слід бути готовими до змін.",
-        "Це дійсно історичний момент.",
-        "Часи змінюються, і нам потрібно адаптуватися.",
-    ])
-    
+    intro = random.choice(
+        [
+            "Новітні дослідження показують",
+            "Експерти передбачають",
+            "На думку аналітиків,",
+            "Останні дані свідчать про",
+            "Проведене дослідження виявило",
+        ]
+    )
+
+    body = random.choice(
+        [
+            "що ця тема набирає неймовірної популярності.",
+            "значні зміни у цій індустрії.",
+            "революційні підходи до розв'язання проблеми.",
+            "глибокі зміни у суспільстві.",
+            "новий рівень розвитку та інновацій.",
+        ]
+    )
+
+    conclusion = random.choice(
+        [
+            "Очікуємо подальшого розвитку ситуації.",
+            "Це змінить світ у найближчому майбутньому.",
+            "Слід бути готовими до змін.",
+            "Це дійсно історичний момент.",
+            "Часи змінюються, і нам потрібно адаптуватися.",
+        ]
+    )
+
     return f"<h2>Аналіз ситуації</h2><p>{intro} {body}</p><p>{conclusion}</p>"
 
 
@@ -226,50 +294,58 @@ def seed_database():
             # 1. ПЛАНИ ПІДПИСОК
             # ============================================================
             print("Створення планів підписок...")
-            free_plan = sub_repo.create({
-                "name": "Безкоштовний",
-                "permissions": {
-                    "no_ads": False,
-                    "exclusive_content": False,
-                    "save_article": False,
-                    "comment": True,
-                },
-                "price_per_month": 0.0,
-                "description": "Доступ до публічних статей з рекламою.",
-            })
-            premium_plan = sub_repo.create({
-                "name": "Преміум",
-                "permissions": {
-                    "no_ads": True,
-                    "exclusive_content": True,
-                    "save_article": True,
-                    "comment": True,
-                },
-                "price_per_month": 9.99,
-                "description": "Повний доступ до всього контенту без реклами.",
-            })
-            student_plan = sub_repo.create({
-                "name": "Студентський",
-                "permissions": {
-                    "no_ads": False,
-                    "exclusive_content": True,
-                    "save_article": True,
-                    "comment": True,
-                },
-                "price_per_month": 4.99,
-                "description": "Доступ до ексклюзивних статей за спеціальною ціною для студентів (з рекламою).",
-            })
-            corporate_plan = sub_repo.create({
-                "name": "Корпоративний",
-                "permissions": {
-                    "no_ads": True,
-                    "exclusive_content": True,
-                    "save_article": True,
-                    "comment": True,
-                },
-                "price_per_month": 7.99,
-                "description": "Повний доступ для вашої команди.",
-            })
+            free_plan = sub_repo.create(
+                {
+                    "name": "Безкоштовний",
+                    "permissions": {
+                        "no_ads": False,
+                        "exclusive_content": False,
+                        "save_article": False,
+                        "comment": True,
+                    },
+                    "price_per_month": 0.0,
+                    "description": "Доступ до публічних статей з рекламою.",
+                }
+            )
+            premium_plan = sub_repo.create(
+                {
+                    "name": "Преміум",
+                    "permissions": {
+                        "no_ads": True,
+                        "exclusive_content": True,
+                        "save_article": True,
+                        "comment": True,
+                    },
+                    "price_per_month": 9.99,
+                    "description": "Повний доступ до всього контенту без реклами.",
+                }
+            )
+            student_plan = sub_repo.create(
+                {
+                    "name": "Студентський",
+                    "permissions": {
+                        "no_ads": False,
+                        "exclusive_content": True,
+                        "save_article": True,
+                        "comment": True,
+                    },
+                    "price_per_month": 4.99,
+                    "description": "Доступ до ексклюзивних статей за спеціальною ціною для студентів (з рекламою).",
+                }
+            )
+            corporate_plan = sub_repo.create(
+                {
+                    "name": "Корпоративний",
+                    "permissions": {
+                        "no_ads": True,
+                        "exclusive_content": True,
+                        "save_article": True,
+                        "comment": True,
+                    },
+                    "price_per_month": 7.99,
+                    "description": "Повний доступ для вашої команди.",
+                }
+            )
             plans = [free_plan, premium_plan, student_plan, corporate_plan]
             print("✓ Плани підписок створено.")
 
@@ -279,10 +355,12 @@ def seed_database():
             print("Створення адміністратора...")
             admin_email = os.getenv("ADMIN_EMAIL", "admin@news.com")
             admin_password = os.getenv("ADMIN_PASSWORD", "admin")
-            admin_repo.create({
-                "email": admin_email,
-                "password": generate_password_hash(admin_password),
-            })
+            admin_repo.create(
+                {
+                    "email": admin_email,
+                    "password": generate_password_hash(admin_password),
+                }
+            )
             print(f"✓ Адміністратор: {admin_email} / {admin_password}")
 
             # ============================================================
@@ -290,46 +368,62 @@ def seed_database():
             # ============================================================
             print("Створення категорій...")
             categories = {
-                "politika": category_repo.create({
-                    "name": "Політика",
-                    "description": "Новини та аналітика політичного життя.",
-                    "slug": "politika",
-                }),
-                "tehnologii": category_repo.create({
-                    "name": "Технології",
-                    "description": "Огляди гаджетів та новини IT.",
-                    "slug": "tehnologii",
-                }),
-                "sport": category_repo.create({
-                    "name": "Спорт",
-                    "description": "Найважливіші спортивні події.",
-                    "slug": "sport",
-                }),
-                "ekonomika": category_repo.create({
-                    "name": "Економіка",
-                    "description": "Все про фінанси та бізнес.",
-                    "slug": "ekonomika",
-                }),
-                "kultura": category_repo.create({
-                    "name": "Культура",
-                    "description": "Мистецтво, кіно та музика.",
-                    "slug": "kultura",
-                }),
-                "podorozhi": category_repo.create({
-                    "name": "Подорожі",
-                    "description": "Ідеї для ваших майбутніх мандрівок.",
-                    "slug": "podorozhi",
-                }),
-                "zdorovya": category_repo.create({
-                    "name": "Здоров'я",
-                    "description": "Медичні новини та поради.",
-                    "slug": "zdorovya",
-                }),
-                "nauka": category_repo.create({
-                    "name": "Наука",
-                    "description": "Наукові дослідження та відкриття.",
-                    "slug": "nauka",
-                }),
+                "politika": category_repo.create(
+                    {
+                        "name": "Політика",
+                        "description": "Новини та аналітика політичного життя.",
+                        "slug": "politika",
+                    }
+                ),
+                "tehnologii": category_repo.create(
+                    {
+                        "name": "Технології",
+                        "description": "Огляди гаджетів та новини IT.",
+                        "slug": "tehnologii",
+                    }
+                ),
+                "sport": category_repo.create(
+                    {
+                        "name": "Спорт",
+                        "description": "Найважливіші спортивні події.",
+                        "slug": "sport",
+                    }
+                ),
+                "ekonomika": category_repo.create(
+                    {
+                        "name": "Економіка",
+                        "description": "Все про фінанси та бізнес.",
+                        "slug": "ekonomika",
+                    }
+                ),
+                "kultura": category_repo.create(
+                    {
+                        "name": "Культура",
+                        "description": "Мистецтво, кіно та музика.",
+                        "slug": "kultura",
+                    }
+                ),
+                "podorozhi": category_repo.create(
+                    {
+                        "name": "Подорожі",
+                        "description": "Ідеї для ваших майбутніх мандрівок.",
+                        "slug": "podorozhi",
+                    }
+                ),
+                "zdorovya": category_repo.create(
+                    {
+                        "name": "Здоров'я",
+                        "description": "Медичні новини та поради.",
+                        "slug": "zdorovya",
+                    }
+                ),
+                "nauka": category_repo.create(
+                    {
+                        "name": "Наука",
+                        "description": "Наукові дослідження та відкриття.",
+                        "slug": "nauka",
+                    }
+                ),
             }
             print(f"✓ Категорій створено: {len(categories)}")
 
@@ -339,17 +433,21 @@ def seed_database():
             print("Створення користувачів (ЦИКЛ - 150 користувачів)...")
             generic_user_password = os.getenv("GENERIC_USER_PASSWORD", "user-password")
             hashed_user_password = generate_password_hash(generic_user_password)
-            
+
             users = {}
             for i in range(150):
-                user = user_repo.create({
-                    "email": random_email(f"user{i}"),
-                    "username": random_username(f"User"),
-                    "password": hashed_user_password,
-                    "preferences": {
-                        "favorite_categories": random.sample(list(categories.keys()), k=random.randint(1, 3))
-                    },
-                })
+                user = user_repo.create(
+                    {
+                        "email": random_email(f"user{i}"),
+                        "username": random_username(f"User"),
+                        "password": hashed_user_password,
+                        "preferences": {
+                            "favorite_categories": random.sample(
+                                list(categories.keys()), k=random.randint(1, 3)
+                            )
+                        },
+                    }
+                )
                 users[f"user_{i}"] = user
                 if (i + 1) % 30 == 0:
                     print(f"  └─ Користувачів створено: {i + 1}/150")
@@ -372,11 +470,13 @@ def seed_database():
             authors = {}
             for i in range(60):
                 first_name, last_name = random_name()
-                author = author_repo.create({
-                    "first_name": first_name,
-                    "last_name": last_name,
-                    "bio": f"Спеціаліст з досвідом більше 10 років у своїй галузі. Автор {random.randint(20, 200)} статей.",
-                })
+                author = author_repo.create(
+                    {
+                        "first_name": first_name,
+                        "last_name": last_name,
+                        "bio": f"Спеціаліст з досвідом більше 10 років у своїй галузі. Автор {random.randint(20, 200)} статей.",
+                    }
+                )
                 authors[f"author_{i}"] = author
                 if (i + 1) % 20 == 0:
                     print(f"  └─ Авторів створено: {i + 1}/60")
@@ -389,22 +489,30 @@ def seed_database():
             print("Створення статей (ЦИКЛ - 1000 статей)...")
             articles = []
             article_count = 0
-            
+
             for category_slug, category_obj in categories.items():
                 for i in range(int(1000 / len(categories))):  # ~62 статей на категорію
-                    article = article_repo.create({
-                        "author_id": random.choice(list(authors.values())).id,
-                        "category_id": category_obj.id,
-                        "title": random_article_title(category_slug),
-                        "content": random_article_content(),
-                        "status": random.choice(["published", "published", "draft"]),  # більше 66% опублікованих
-                        "is_breaking": random.choice([True, False, False, False]),  # 25% breaking news
-                        "is_exclusive": random.choice([True, False, False]),  # 33% ексклюзивних
-                        "views_count": random.randint(100, 3000),
-                    })
+                    article = article_repo.create(
+                        {
+                            "author_id": random.choice(list(authors.values())).id,
+                            "category_id": category_obj.id,
+                            "title": random_article_title(category_slug),
+                            "content": random_article_content(),
+                            "status": random.choice(
+                                ["published", "published", "draft"]
+                            ),  # більше 66% опублікованих
+                            "is_breaking": random.choice(
+                                [True, False, False, False]
+                            ),  # 25% breaking news
+                            "is_exclusive": random.choice(
+                                [True, False, False]
+                            ),  # 33% ексклюзивних
+                            "views_count": random.randint(100, 3000),
+                        }
+                    )
                     articles.append(article)
                     article_count += 1
-                    
+
                     if article_count % 100 == 0:
                         print(f"  └─ Статей створено: {article_count}/500")
 
@@ -415,17 +523,23 @@ def seed_database():
             # ============================================================
             print("Створення взаємодій (ЦИКЛ - лайки та збереження)...")
             interactions_to_add = []
-            
+
             for user_key, user in list(users.items()):
                 # Кожен користувач взаємодіє з 10-20 статтями
-                random_articles = random.sample(articles, k=min(random.randint(10, 30), len(articles)))
-                
+                random_articles = random.sample(
+                    articles, k=min(random.randint(10, 30), len(articles))
+                )
+
                 for article in random_articles:
                     interaction_type = random.choice(["like", "like", "like", "saved"])
                     interactions_to_add.append(
-                        ArticleInteraction(user_id=user.id, article_id=article.id, interaction_type=interaction_type)
+                        ArticleInteraction(
+                            user_id=user.id,
+                            article_id=article.id,
+                            interaction_type=interaction_type,
+                        )
                     )
-                
+
                 if len(interactions_to_add) % 500 == 0:
                     print(f"  └─ Взаємодій додано: {len(interactions_to_add)}")
             db_session.add_all(interactions_to_add)
@@ -436,20 +550,22 @@ def seed_database():
             # ============================================================
             print("Створення коментарів (ЦИКЛ - 1000+ коментарів)...")
             comments_count = 0
-            
+
             # Кожна стаття отримує 1-3 коментарі
             for article in articles:
                 num_comments = random.randint(1, 5)
-                
+
                 for _ in range(num_comments):
                     random_user = random.choice(list(users.values()))
-                    comment_repo.create({
-                        "article_id": article.id,
-                        "user_id": random_user.id,
-                        "text": random_text(),
-                    })
+                    comment_repo.create(
+                        {
+                            "article_id": article.id,
+                            "user_id": random_user.id,
+                            "text": random_text(),
+                        }
+                    )
                     comments_count += 1
-                
+
                 if comments_count % 200 == 0:
                     print(f"  └─ Коментарів створено: {comments_count}")
 
@@ -471,14 +587,16 @@ def seed_database():
             ]
 
             for ad_title in ad_titles:
-                ad_repo.create({
-                    "title": ad_title,
-                    "content": f"Реклама '{ad_title}'. Дізнайтеся більше!",
-                    "ad_type": random.choice(["banner", "sidebar", "video"]),
-                    "is_active": True,
-                    "impressions_count": random.randint(5000, 30000),
-                    "clicks_count": random.randint(100, 2000),
-                })
+                ad_repo.create(
+                    {
+                        "title": ad_title,
+                        "content": f"Реклама '{ad_title}'. Дізнайтеся більше!",
+                        "ad_type": random.choice(["banner", "sidebar", "video"]),
+                        "is_active": True,
+                        "impressions_count": random.randint(5000, 30000),
+                        "clicks_count": random.randint(100, 2000),
+                    }
+                )
 
             print(f"✓ Рекламних оголошень створено: {len(ad_titles)}")
 
@@ -486,7 +604,7 @@ def seed_database():
             # ФІКСАЦІЯ ВСІХ ЗМІН
             # ============================================================
             db_session.commit()
-            
+
             print("\n" + "=" * 60)
             print("✅ УСІ ДАНІ УСПІШНО СТВОРЕНО И ЗБЕРЕЖЕНО!")
             print("=" * 60)
@@ -503,6 +621,7 @@ def seed_database():
         except Exception as e:
             print(f"\n❌ СТАЛАСЯ ПОМИЛКА: {e}")
             import traceback
+
             traceback.print_exc()
             db_session.rollback()
         finally:

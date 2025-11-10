@@ -10,6 +10,12 @@
 
 	let allCategories = $derived($categoryStore);
 
+	let isSubscribedNewsletter = $state(
+		$userStore?.is_subscribed_to_newsletter ?? false,
+	);
+	let newsletterLoading = $state(false);
+	let newsletterError = $state("");
+
 	let dailyDigest = $state($userStore?.preferences?.dailyDigest ?? true);
 	let authorNews = $state($userStore?.preferences?.authorNews ?? false);
 	let breakingNews = $state($userStore?.preferences?.breakingNews ?? true);
@@ -82,6 +88,35 @@
 			pushLoading = false;
 		}
 	}
+
+	async function handleToggleNewsletter() {
+		if (newsletterLoading) return;
+		newsletterLoading = true;
+		newsletterError = "";
+		success = "";
+
+		try {
+			const { is_subscribed } = await api.post<{
+				is_subscribed: boolean;
+			}>("/auth/me/newsletter/toggle", undefined);
+			isSubscribedNewsletter = is_subscribed;
+
+			userStore.update((user) => {
+				if (user) {
+					user.is_subscribed_to_newsletter = is_subscribed;
+				}
+				return user;
+			});
+
+			success = "Налаштування email-розсилки оновлено!";
+		} catch (e: any) {
+			newsletterError =
+				e.message || "Не вдалося оновити підписку на розсилку.";
+			isSubscribedNewsletter = !isSubscribedNewsletter;
+		} finally {
+			newsletterLoading = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -107,6 +142,28 @@
 				<Alert type="success">{pushSuccess}</Alert>
 			{/if}
 
+			<fieldset class="space-y-4 pt-4">
+				<legend
+					class="text-lg font-semibold text-gray-800 border-b pb-2"
+					>Email-розсилка</legend
+				>
+				{#if newsletterError}
+					<Alert type="error">{newsletterError}</Alert>
+				{/if}
+				<div class="flex items-center justify-between">
+					<label for="newsletterSub" class="font-medium text-gray-700"
+						>Отримувати загальну email-розсилку</label
+					>
+					<input
+						id="newsletterSub"
+						type="checkbox"
+						bind:checked={isSubscribedNewsletter}
+						onchange={handleToggleNewsletter}
+						disabled={newsletterLoading}
+						class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+					/>
+				</div>
+			</fieldset>
 			<fieldset class="space-y-4">
 				<legend
 					class="text-lg font-semibold text-gray-800 border-b pb-2"

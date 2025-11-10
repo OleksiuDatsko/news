@@ -3,6 +3,7 @@ from sqlalchemy import desc
 from .repositories import BaseRepository
 from models.article import Comment
 
+
 class CommentRepository(BaseRepository):
     def __init__(self, db_session: Session):
         super().__init__(db_session, Comment)

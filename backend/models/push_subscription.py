@@ -2,6 +2,7 @@ from sqlalchemy import Column, Text, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from models.base import BaseModel
 
+
 class PushSubscription(BaseModel):
     __tablename__ = "push_subscriptions"
 

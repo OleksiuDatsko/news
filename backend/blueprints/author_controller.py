@@ -15,7 +15,7 @@ def get_author(author_id):
         author = author_repo.get_by(id=author_id)
         if not author:
             return jsonify({"msg": "Автора не знайдено"}), 404
-        
+
         return jsonify(author.to_dict()), 200
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
@@ -28,10 +28,7 @@ def get_author_articles(current_user, author_id):
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
 
-    filters = {
-        "author_id": author_id,
-        "status": "published"
-    }
+    filters = {"author_id": author_id, "status": "published"}
 
     if not getattr(current_user, "permissions", {}).get("exclusive_content", False):
         filters["is_exclusive"] = False
@@ -57,7 +54,8 @@ def get_author_articles(current_user, author_id):
         )
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
-    
+
+
 @author_bp.route("/followed", methods=["GET"])
 @token_required
 def get_followed_authors(current_user: User):
@@ -67,7 +65,8 @@ def get_followed_authors(current_user: User):
         result = [author.to_dict() for author in followed]
         return jsonify({"authors": result, "total": len(result)}), 200
     except Exception as e:
-        return jsonify({"msg": str(e)}), 500    
+        return jsonify({"msg": str(e)}), 500
+
 
 @author_bp.route("/<int:author_id>/toggle-follow", methods=["POST"])
 @token_required
@@ -82,7 +81,7 @@ def toggle_follow_author(current_user: User, author_id: int):
         return jsonify({"msg": "Автора не знайдено"}), 404
 
     is_following = False
-    
+
     if author in current_user.followed_authors:
         current_user.followed_authors.remove(author)
         is_following = False
@@ -91,11 +90,11 @@ def toggle_follow_author(current_user: User, author_id: int):
         is_following = True
 
     try:
-        g.db_session.commit() 
-        return jsonify({
-            "msg": "Статус підписки оновлено", 
-            "is_following": is_following
-        }), 200
+        g.db_session.commit()
+        return (
+            jsonify({"msg": "Статус підписки оновлено", "is_following": is_following}),
+            200,
+        )
     except Exception as e:
         g.db_session.rollback()
         return jsonify({"msg": f"Помилка оновлення: {str(e)}"}), 500

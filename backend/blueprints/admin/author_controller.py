@@ -17,7 +17,6 @@ def get_all_authors(current_admin):
         author_repo = get_author_repo()
         authors = author_repo.get_all()
 
-        
         if search:
             search_lower = search.lower()
             authors = [
@@ -28,7 +27,6 @@ def get_all_authors(current_admin):
                 or (author.bio and search_lower in author.bio.lower())
             ]
 
-        
         start = (page - 1) * per_page
         end = start + per_page
         paginated_authors = [author.to_dict() for author in authors[start:end]]
@@ -143,7 +141,6 @@ def delete_author(current_admin, author_id):
         if not author:
             return jsonify({"msg": "Автора не знайдено"}), 404
 
-        
         article_repo = get_article_repo()
         author_articles = [
             article
@@ -186,7 +183,7 @@ def get_author_articles(current_admin, author_id):
         db_filters = {"author_id": author_id}
         if status:
             db_filters["status"] = status
-        
+
         author_articles = article_repo.get_all_by(**db_filters)
 
         if status:
@@ -238,7 +235,6 @@ def get_author_statistics(current_admin, author_id):
             if article.author_id == author_id
         ]
 
-        
         stats = {
             "author": author.to_dict(),
             "articles": {
@@ -272,7 +268,6 @@ def get_author_statistics(current_admin, author_id):
             },
         }
 
-        
         if author_articles:
             most_viewed = max(author_articles, key=lambda x: x.views_count)
             stats["engagement"]["most_viewed_article"] = {
@@ -286,7 +281,6 @@ def get_author_statistics(current_admin, author_id):
                 ),
             }
 
-        
         category_stats = {}
         for article in author_articles:
             if article.category_id:
@@ -318,7 +312,6 @@ def search_authors(current_admin):
         author_repo = get_author_repo()
         authors = author_repo.get_all()
 
-        
         query_lower = query.lower()
         found_authors = []
 
@@ -326,7 +319,6 @@ def search_authors(current_admin):
             match_score = 0
             author_data = author.to_dict()
 
-            
             if query_lower in author.first_name.lower():
                 match_score += 3
             if query_lower in author.last_name.lower():
@@ -338,7 +330,6 @@ def search_authors(current_admin):
                 author_data["match_score"] = match_score
                 found_authors.append(author_data)
 
-        
         found_authors = sorted(
             found_authors, key=lambda x: x["match_score"], reverse=True
         )
@@ -356,6 +347,7 @@ def search_authors(current_admin):
         )
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
+
 
 @admin_token_required
 def get_category_articles(current_admin, author_id):

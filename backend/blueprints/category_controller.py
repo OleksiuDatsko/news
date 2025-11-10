@@ -21,11 +21,11 @@ def get_category_by_slug(slug):
     """Отримує одну категорію за її 'slug'"""
     try:
         category_repo = get_category_repo()
-        category = category_repo.get_by(slug=slug) 
-        
+        category = category_repo.get_by(slug=slug)
+
         if not category:
             return jsonify({"msg": "Категорію не знайдено"}), 404
-            
+
         return jsonify(category.to_dict()), 200
     except Exception as e:
         return jsonify({"msg": str(e)}), 500

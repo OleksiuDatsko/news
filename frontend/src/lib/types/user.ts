@@ -14,4 +14,5 @@ export interface IUser {
     [key: string]: any
   }
   followed_authors?: number[];
+  is_subscribed_to_newsletter: boolean;
 }
