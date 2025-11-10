@@ -9,7 +9,7 @@ interface PlanData {
 
 export const load: PageLoad = async ({ fetch }) => {
 	try {
-		// Використовуємо адмін ендпоінт
+		
 		const data = await api.get<PlanData>('/admin/subscriptions/', fetch);
 		return {
 			plans: data.plans,

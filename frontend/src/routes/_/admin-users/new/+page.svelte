@@ -14,7 +14,7 @@
 		loading = true;
 		error = '';
 		try {
-			// Використовуємо ендпоінт реєстрації адміна
+			
 			await api.post('/admin/auth/register', {
 				email,
 				password

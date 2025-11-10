@@ -26,10 +26,9 @@
 		error = '';
 
 		try {
-			// Використовуємо існуючий POST endpoint [cite: 72]
 			const newComment = await api.post<IComment>(`/articles/${articleId}/comments`, { text });
-			text = ''; // Очистити поле
-			onCommentPosted(newComment); // Повідомити батьківський компонент про успіх
+			text = '';
+			onCommentPosted(newComment);
 		} catch (e: any) {
 			error = e.message || 'Не вдалося додати коментар.';
 		} finally {

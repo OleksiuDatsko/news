@@ -185,7 +185,7 @@ def record_article_impression(current_user, article_id):
         success = article_service.record_article_impression(
             article_id=article_id,
             user_id=current_user.id if current_user else None,
-            session_id=data.get("session_id"), # Можна додати для анонімів
+            session_id=data.get("session_id"), 
             ip_address=request.remote_addr,
         )
 

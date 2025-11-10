@@ -79,7 +79,7 @@ def update_admin_user(current_admin, admin_id):
 def delete_admin_user(current_admin, admin_id):
     """Видаляє адміністратора"""
     try:
-        # Перевіряємо, чи адмін не намагається видалити сам себе
+        
         if current_admin.id == admin_id:
             return jsonify({"msg": "Ви не можете видалити свій власний аккаунт"}), 403
 

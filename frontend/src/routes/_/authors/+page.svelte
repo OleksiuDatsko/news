@@ -17,7 +17,7 @@
 	}
 
 	function handleEdit(authorId: number) {
-		// Переходимо на сторінку редагування
+		
 		goto(`/_/authors/${authorId}`);
 	}
 

@@ -1,4 +1,4 @@
-# backend/models/ad.py
+
 from sqlalchemy import Column, Text, BigInteger, DateTime, ForeignKey, Boolean, func
 from sqlalchemy.orm import relationship
 from models.base import BaseModel
@@ -43,7 +43,7 @@ class AdView(BaseModel):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
-    # Relationships
+    
     ad = relationship("Ad", back_populates="ad_views")
     user = relationship("User", back_populates="ad_views")
 

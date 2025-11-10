@@ -5,8 +5,8 @@
 	import type { IAdminAd } from './+page.ts';
 
 	let {
-		ad = null, // Передаємо дані для режиму редагування
-		onSubmit, // Функція, яку компонент викликає при сабміті
+		ad = null, 
+		onSubmit, 
 		error = $bindable(''),
 		loading = $bindable(false)
 	}: {
@@ -20,7 +20,7 @@
 	let content = $state(ad?.content ?? '');
 	let ad_type = $state(ad?.ad_type ?? 'banner');
 	let is_active = $state(ad?.is_active ?? true);
-	// <input type="date"> вимагає формат YYYY-MM-DD
+	
 	let start_date = $state(ad?.start_date ? new Date(ad.start_date).toISOString().split('T')[0] : '');
 	let end_date = $state(ad?.end_date ? new Date(ad.end_date).toISOString().split('T')[0] : '');
 
@@ -30,8 +30,8 @@
 		loading = true;
 		error = '';
 
-		// Конвертуємо дати в ISO формат, або null, якщо поле порожнє
-		// Бекенд очікує дати в ISO (або null) [cite: 99, 101, 111, 112]
+		
+		
 		const payload = {
 			title,
 			content,

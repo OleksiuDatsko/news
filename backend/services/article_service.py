@@ -156,12 +156,12 @@ class ArticleService:
         if not article:
             raise ValueError("Статтю не знайдено")
 
-        # 1. Збільшуємо загальний лічильник
+        
         self.article_repo.update(
             article, {"views_count": (article.views_count or 0) + 1}
         )
 
-        # 2. Створюємо запис про перегляд
+        
         article_view_repo = get_article_view_repo()
         article_view_repo.create(
             {

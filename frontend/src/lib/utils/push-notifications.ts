@@ -24,7 +24,6 @@ export async function subscribeToPush() {
     
     const registration = await navigator.serviceWorker.ready;
     
-    // Перевіряємо, чи вже є підписка
     let subscription = await registration.pushManager.getSubscription();
     
     if (subscription) {
@@ -32,26 +31,22 @@ export async function subscribeToPush() {
         return subscription;
     }
 
-    // Запитуємо дозвіл
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
         throw new Error('Користувач не надав дозвіл на сповіщення.');
     }
 
-    // Створюємо нову підписку
     const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
     subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: applicationServerKey
     });
 
-    // Надсилаємо підписку на бекенд
     try {
         await api.post('/notifications/subscribe', subscription.toJSON());
         console.log('Підписка успішно надіслана на сервер.');
     } catch (err) {
         console.error('Не вдалося надіслати підписку на сервер:', err);
-        // Якщо не вдалося, відписуємо користувача, щоб він міг спробувати знову
         await subscription.unsubscribe();
         throw err;
     }

@@ -34,7 +34,7 @@ self.addEventListener('notificationclick', (event) => {
             type: 'window',
             includeUncontrolled: true
         }).then((clientList) => {
-            // Якщо вкладка з сайтом вже відкрита - фокусуємось на ній
+            
             if (clientList.length > 0) {
                 let client = clientList[0];
                 for (let i = 0; i < clientList.length; i++) {
@@ -44,7 +44,7 @@ self.addEventListener('notificationclick', (event) => {
                 }
                 return client.focus().then(c => c.navigate(urlToOpen));
             }
-            // Інакше - відкриваємо нову
+            
             return clients.openWindow(urlToOpen);
         })
     );

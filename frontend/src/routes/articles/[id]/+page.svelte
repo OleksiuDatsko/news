@@ -93,7 +93,7 @@
         if (isLiked) {
             likesCount = likesCount + 1;
         } else {
-            likesCount = Math.max(0, likesCount - 1); // Захист від < 0
+            likesCount = Math.max(0, likesCount - 1); 
         }
 
         try {

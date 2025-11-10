@@ -11,7 +11,7 @@ interface AdminUserData {
 
 export const load: PageLoad = async ({ fetch, url }) => {
     const page = url.searchParams.get('page') || '1';
-    const perPage = '15'; // Ви можете зробити це також параметром URL
+    const perPage = '15'; 
 
     try {
         const data = await api.get<AdminUserData>(

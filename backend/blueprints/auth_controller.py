@@ -123,7 +123,7 @@ def update_preferences():
 
     try:
         updated_user = user_repo.update(current_user, {"preferences": data})
-        # Повертаємо оновлений об'єкт user
+        
         return jsonify({"user": updated_user.to_dict()}), 200
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
@@ -134,8 +134,3 @@ def logout():
     response = make_response(jsonify({"msg": "Успішний вихід"}))
     unset_jwt_cookies(response)
     return response, 200
-
-
-@auth_bp.route("/test")
-def test_page():
-    return render_template("test_auth.html")

@@ -9,14 +9,14 @@
 
 	let { data }: { data: PageData } = $props();
 
-	// Логіка форми з оригінального файлу 
+	
 	let first_name = $state(data.author?.first_name ?? '');
 	let last_name = $state(data.author?.last_name ?? '');
 	let bio = $state(data.author?.bio ?? '');
 	let error = $state('');
 	let loading = $state(false);
 
-	// Додаємо $effect для синхронізації, якщо дані оновляться
+	
 	$effect(() => {
 		first_name = data.author?.first_name ?? '';
 		last_name = data.author?.last_name ?? '';
@@ -41,7 +41,7 @@
 		} 
 	}
 
-	// Функція для форматування дати (з іншої сторінки) 
+	
 	function formatDate(dateString: string) {
 		return new Date(dateString).toLocaleDateString('uk-UA', {
 			year: 'numeric',

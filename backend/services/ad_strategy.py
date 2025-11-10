@@ -41,7 +41,7 @@ class RotationAdStrategy(AdSelectionStrategy):
             if len(selected) == limit:
                 break
         
-        # Оновлюємо стан для наступного виклику
+        
         rotation_state[ad_type_key] = (start_index + len(selected)) % num_ads
         
         return selected

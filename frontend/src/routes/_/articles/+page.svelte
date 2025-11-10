@@ -67,7 +67,6 @@
 		loadingPublishId = articleId;
 		error = "";
 		try {
-			// Використовуємо існуючий API-ендпоінт для оновлення статусу
 			const updatedArticle = await api.put<IArticle>(
 				`/admin/articles/${articleId}/status`,
 				{
@@ -75,7 +74,7 @@
 				},
 			);
 
-			// Оновлюємо дані в таблиці "на льоту" без перезавантаження
+			
 			articles = articles.map((a) =>
 				a.id === articleId ? updatedArticle : a,
 			);

@@ -16,13 +16,13 @@ class CommentService:
 
     def get_comments_for_article(self, article_id: int, page: int = 1, per_page: int = 10) -> List[Dict]:
         """Отримує список коментарів для статті"""
-        # Перевіряємо, чи існує стаття
+        
         article = self.article_repo.get_by_id(article_id)
         if not article:
             raise ValueError("Статтю не знайдено")
             
         comments = self.comment_repo.get_by_article(article_id, page, per_page)
-        # Використовуємо to_dict з моделі Comment, яка повертає і дані юзера
+        
         return [comment.to_dict() for comment in comments]
 
     def create_comment(self, user_id: int, article_id: int, text: str) -> Dict:
