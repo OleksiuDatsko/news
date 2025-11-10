@@ -4,8 +4,8 @@
     import { api } from "$lib/services/api";
     import AdCard from "$lib/components/ui/cards/AdCard.svelte";
     import CommentList from "$lib/components/comments/CommentList.svelte";
-    import { error } from "@sveltejs/kit";
     import { onMount } from "svelte";
+    import ArticleCard from "$lib/components/ui/cards/ArticleCard.svelte";
 
     let { data }: { data: PageData } = $props();
 
@@ -17,20 +17,20 @@
     let likesCount = $state(0);
 
     onMount(() => {
-		if (article) {
-			const key = `viewed_article_${article.id}`;
-			if (!sessionStorage.getItem(key)) {
-				api.post(`/articles/${article.id}/impression`, {})
-					.then(() => {
-						sessionStorage.setItem(key, 'true');
-						console.log(`View tracked for article ${article.id}`);
-					})
-					.catch((err) => {
-						console.error('Failed to track article view', err);
-					});
-			}
-		}
-	});
+        if (article) {
+            const key = `viewed_article_${article.id}`;
+            if (!sessionStorage.getItem(key)) {
+                api.post(`/articles/${article.id}/impression`, {})
+                    .then(() => {
+                        sessionStorage.setItem(key, "true");
+                        console.log(`View tracked for article ${article.id}`);
+                    })
+                    .catch((err) => {
+                        console.error("Failed to track article view", err);
+                    });
+            }
+        }
+    });
 
     $effect(() => {
         isSaved = article?.is_saved ?? false;
@@ -265,6 +265,23 @@
 
             {#if article}
                 <CommentList articleId={article.id} />
+            {/if}
+            {#if data.recommendations && data.recommendations.length > 0}
+                <div class="mt-12 border-t pt-8">
+                    <h2 class="text-2xl font-bold mb-6">
+                        Рекомендовані статті
+                    </h2>
+                    <div class="space-y-6">
+                        {#each data.recommendations as rec (rec.id)}
+                            {@const displayArticle = {
+                                ...rec,
+                                is_breaking: false,
+                                is_exclusive: false,
+                            }}
+                            <ArticleCard article={displayArticle} />
+                        {/each}
+                    </div>
+                </div>
             {/if}
         </div>
 

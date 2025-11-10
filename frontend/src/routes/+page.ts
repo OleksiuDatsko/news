@@ -17,13 +17,7 @@ export const load: PageLoad = async ({ fetch, url }) => {
 	const page = url.searchParams.get('page') || '1';
 	const userId = get(userStore)?.id
 	try {
-		let data;
-		console.log(userId)
-		if (userId) {
-			data = await api.get<ArticleData>(`/articles/recommended?page=${page}`, fetch);
-		} else {
-			data = await api.get<ArticleData>(`/articles/?page=${page}`, fetch);
-		}
+		const data = await api.get<ArticleData>(`/articles/?page=${page}`, fetch);
 		return {
 			articles: data.articles,
 			ads: data.ads,

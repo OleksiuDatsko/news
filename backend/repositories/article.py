@@ -23,7 +23,7 @@ class ArticleRepository(BaseRepository):
                 query = query.filter_by(status=filters.get("status", "published"))
             if filters.get("category_id"):
                 query = query.filter_by(category_id=filters["category_id"])
-            if filters.get("is_exclusive"):
+            if filters.get("is_exclusive") is not None:
                 query = query.filter_by(is_exclusive=filters["is_exclusive"])
             if filters.get("author_id"):
                 query = query.filter_by(author_id=filters["author_id"])

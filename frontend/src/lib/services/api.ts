@@ -1,6 +1,10 @@
 import { adminStore, userStore } from '$lib/stores/authStore';
+import { get } from 'svelte/store';
 
 type FetchFn = typeof fetch;
+
+export const PUBLIC_ROUTES = ['/auth/login', '/auth/register', '/admin/login'];
+
 
 export class ApiError extends Error {
 	status: number;
@@ -46,7 +50,20 @@ async function handleRefresh(url: string, baseFetch: FetchFn): Promise<void> {
 
 	isRefreshing = true;
 
-	const isAdmin = url.startsWith('/admin/');
+	let isAdmin = false;
+	const admin = get(adminStore);
+	const user = get(userStore);
+
+	if (admin) {
+		isAdmin = true;
+	} else if (user) {
+		isAdmin = false;
+	} else {
+		isAdmin = url.startsWith('/_');
+	}
+
+	console.log(`Token refresh triggered for: ${isAdmin ? 'ADMIN' : 'USER'}`);
+
 	const refreshUrl = isAdmin ? '/admin/auth/refresh' : '/auth/refresh';
 	const logoutUrl = isAdmin ? '/admin/auth/logout' : '/auth/logout';
 	const fullRefreshUrl = `/api${refreshUrl}`;
@@ -66,7 +83,7 @@ async function handleRefresh(url: string, baseFetch: FetchFn): Promise<void> {
 			userStore.set(null);
 			adminStore.set(null);
 
-			await baseFetch(fullLogoutUrl, {method: 'POST'})
+			await baseFetch(fullLogoutUrl, { method: 'POST' })
 			throw new ApiError('Сесія вичерпана. Будь ласка, увійдіть знову.', 401, null);
 		} finally {
 			isRefreshing = false;
@@ -99,8 +116,7 @@ const request = async <T>(
 
 	try {
 		const response = await fetchFn(fullUrl, options);
-
-		if (response.status !== 401) {
+		if (response.status !== 401 || PUBLIC_ROUTES.includes(url)) {
 			return handleResponse<T>(response);
 		}
 
@@ -115,7 +131,7 @@ const request = async <T>(
 		if (error instanceof ApiError) {
 			throw error;
 		}
-		
+
 		if (error instanceof Error) {
 			throw new ApiError(error.message || 'Network error', 0, null);
 		}

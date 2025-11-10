@@ -428,7 +428,6 @@ def seed_database():
                 
                 if len(interactions_to_add) % 500 == 0:
                     print(f"  └─ Взаємодій додано: {len(interactions_to_add)}")
-
             db_session.add_all(interactions_to_add)
             print(f"✓ Взаємодій створено: {len(interactions_to_add)}")
 

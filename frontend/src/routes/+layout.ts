@@ -1,6 +1,6 @@
 import { userStore, adminStore } from '$lib/stores/authStore';
 import { categoryStore } from '$lib/stores/categoryStore';
-import { api } from '$lib/services/api';
+import { api, PUBLIC_ROUTES } from '$lib/services/api';
 import { get } from 'svelte/store';
 import { notificationStore, loadNotifications } from '$lib/stores/notificationStore';
 import type { LayoutLoad } from './$types';
@@ -10,13 +10,11 @@ import type { ICategory } from '$lib/types/category';
 
 export const ssr = false;
 
-const PUBLIC_ROUTES = ['/auth/login', '/auth/register', '/admin/login'];
-
 export const load: LayoutLoad = async ({ fetch, url }) => {
 	const currentPath = url.pathname;
 	const isPublicRoute = PUBLIC_ROUTES.includes(currentPath);
-
 	const promises = [];
+
 	if (!isPublicRoute) {
 		const currentUser = get(userStore);
 		const currentAdmin = get(adminStore);
@@ -24,30 +22,43 @@ export const load: LayoutLoad = async ({ fetch, url }) => {
 
 		if (!currentUser && !currentAdmin) {
 			const authPromise = (async () => {
-				try {
-					const { admin } = await api.get<{ admin: IAdmin }>(
-						'/admin/auth/me',
-						fetch
-					);
-					adminStore.set(admin);
-				} catch (e) {
-					adminStore.set(null);
-					try {
-						const { user } = await api.get<{ user: IUser }>('/auth/me', fetch);
-						const canSave = user?.permissions?.save_article;
-						if (canSave && user) {
+				const adminAuthPromise = api.get<{ admin: IAdmin }>(
+					'/admin/auth/me',
+					fetch
+				);
+				const userAuthPromise = api.get<{ user: IUser }>('/auth/me', fetch);
+
+				const [adminResult, userResult] = await Promise.allSettled([
+					adminAuthPromise,
+					userAuthPromise
+				]);
+
+				adminStore.set(null);
+				userStore.set(null);
+
+				if (adminResult.status === 'fulfilled') {
+					adminStore.set(adminResult.value.admin);
+				} else if (userResult.status === 'fulfilled') {
+					const { user } = userResult.value;
+					const canSave = user?.permissions?.save_article;
+
+					if (canSave && user) {
+						try {
 							const savedArticles = await api.get<number[]>(
 								'/articles/saved?ids=true',
 								fetch
 							);
 							user.savedArticles = savedArticles;
+						} catch (e) {
+							console.error("Failed to load saved articles", e);
+							user.savedArticles = [];
 						}
-						userStore.set(user);
-						if (user && !notificationsLoaded) {
-							loadNotifications(fetch);
-						}
-					} catch (err) {
-						userStore.set(null);
+					}
+
+					userStore.set(user);
+
+					if (user && !notificationsLoaded) {
+						loadNotifications(fetch);
 					}
 				}
 			})();
