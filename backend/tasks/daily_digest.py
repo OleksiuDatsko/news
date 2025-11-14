@@ -65,7 +65,7 @@ def send_daily_digest_push():
                 print("Немає нових статей за останні 24 години.")
                 db_session.close()
                 return
-            
+
             top_article = top_articles[0]
 
             push_payload = {

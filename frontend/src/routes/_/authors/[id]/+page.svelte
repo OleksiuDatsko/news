@@ -6,6 +6,7 @@
   import Input from '$lib/components/ui/Input.svelte';
   import type { PageData } from './$types';
   import SmallArticleCard from '$lib/components/ui/cards/SmallArticleCard.svelte';
+  import Pagination from '$lib/components/ui/Pagination.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -100,7 +101,7 @@
     <div class="lg:col-span-1">
       <div class="bg-white p-6 rounded-lg shadow-lg">
         <h2 class="text-xl font-bold text-gray-900 mb-4">
-          Статті цього автора ({data.articles.length})
+          Статті цього автора ({data.total})
         </h2>
         {#if data.articles.length > 0}
           <ul class="space-y-4">
@@ -110,6 +111,12 @@
               </li>
             {/each}
           </ul>
+          <Pagination
+            showTotal={false}
+            currentPage={data.page}
+            perPage={data.perPage}
+            totalItems={data.total}
+          />
         {:else}
           <p class="text-sm text-gray-500">У цього автора ще немає статей.</p>
         {/if}

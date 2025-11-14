@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from services.article_service import ArticleService
 from middleware.auth_middleware import admin_token_required
 from repositories import get_category_repo, get_article_repo
 from slugify import slugify
@@ -147,14 +148,30 @@ def delete_category(current_admin, category_id):
 @category_bp.route("/<int:category_id>/articles", methods=["GET"])
 @admin_token_required
 def get_category_articles(current_admin, category_id):
-    """Отримує всі статті для конкретної категорії"""
+    """Отримує всі статті для конкретної категорії (З ПАГІНАЦІЄЮ)"""
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 5, type=int)
+
     try:
         category = get_category_repo().get_by(id=category_id)
+        if not category:
+            return jsonify({"msg": "Категорію не знайдено"}), 404
+
+        article_service = ArticleService(get_article_repo())
+        filters = {"category_id": category_id}
+
+        articles, total = article_service.get_articles(
+            page=page, per_page=per_page, filters=filters
+        )
 
         return (
             jsonify(
                 {
-                    "articles": [article.to_dict() for article in category.articles],
+                    "articles": [article.to_dict() for article in articles],
+                    "page": page,
+                    "per_page": per_page,
+                    "total": total,
+                    "category_name": category.name,
                 }
             ),
             200,

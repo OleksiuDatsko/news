@@ -5,15 +5,16 @@
   let {
     totalItems,
     perPage,
-    currentPage
+    currentPage,
+    showTotal = true
   }: {
     totalItems: number;
     perPage: number;
     currentPage: number;
+    showTotal?: boolean;
   } = $props();
 
   let totalPages = $derived(Math.ceil(totalItems / perPage));
-  console.log('Total Pages:', totalItems / perPage, totalItems);
 
   function onPageChange(newPage: number) {
     if (newPage < 1 || newPage > totalPages) {
@@ -69,17 +70,19 @@
 {#if totalPages > 1}
   <nav class="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 mt-6">
     <div class="flex-1 justify-between sm:flex sm:items-center">
-      <div>
-        <p class="text-sm text-gray-700">
-          Показано
-          <span class="font-medium">{(currentPage - 1) * perPage + 1}</span>
-          -
-          <span class="font-medium">{Math.min(currentPage * perPage, totalItems)}</span>
-          з
-          <span class="font-medium">{totalItems}</span>
-          результатів
-        </p>
-      </div>
+      {#if showTotal}
+        <div>
+          <p class="text-sm text-gray-700">
+            Показано
+            <span class="font-medium">{(currentPage - 1) * perPage + 1}</span>
+            -
+            <span class="font-medium">{Math.min(currentPage * perPage, totalItems)}</span>
+            з
+            <span class="font-medium">{totalItems}</span>
+            результатів
+          </p>
+        </div>
+      {/if}
       <div>
         <ul class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
           <li

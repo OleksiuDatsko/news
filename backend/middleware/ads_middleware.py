@@ -13,7 +13,7 @@ def ads_injector(ad_type: str = None, limit=3, strategy="random"):
         @wraps(f)
         def wrapper(current_user, *args, **kwargs):
             user_permissions = {}
-            if current_user:
+            if current_user and not current_user.is_admin:
                 user_permissions = current_user.permissions
             ad_repo = get_ad_repo()
             ad_service = AdService(ad_repo)
