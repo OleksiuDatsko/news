@@ -10,15 +10,12 @@ author_bp = Blueprint("author", __name__)
 @author_bp.route("/<int:author_id>", methods=["GET"])
 def get_author(author_id):
     """Отримує публічну інформацію про автора за ID"""
-    try:
-        author_repo = get_author_repo()
-        author = author_repo.get_by(id=author_id)
-        if not author:
-            return jsonify({"msg": "Автора не знайдено"}), 404
+    author_repo = get_author_repo()
+    author = author_repo.get_by(id=author_id)
+    if not author:
+        raise ValueError("Автора не знайдено")
 
-        return jsonify(author.to_dict()), 200
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    return jsonify(author.to_dict()), 200
 
 
 @author_bp.route("/<int:author_id>/articles", methods=["GET"])
@@ -36,36 +33,30 @@ def get_author_articles(current_user, author_id):
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
 
-    try:
-        articles, total = article_service.get_articles(
-            page=page, per_page=per_page, filters=filters
-        )
-        result = [article.to_dict(metadata=True) for article in articles]
-        return (
-            jsonify(
-                {
-                    "articles": result,
-                    "page": page,
-                    "per_page": per_page,
-                    "total": total,
-                }
-            ),
-            200,
-        )
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    articles, total = article_service.get_articles(
+        page=page, per_page=per_page, filters=filters
+    )
+    result = [article.to_dict(metadata=True) for article in articles]
+    return (
+        jsonify(
+            {
+                "articles": result,
+                "page": page,
+                "per_page": per_page,
+                "total": total,
+            }
+        ),
+        200,
+    )
 
 
 @author_bp.route("/followed", methods=["GET"])
 @token_required
 def get_followed_authors(current_user: User):
     """Отримує список авторів, на яких підписаний поточний користувач"""
-    try:
-        followed = current_user.followed_authors
-        result = [author.to_dict() for author in followed]
-        return jsonify({"authors": result, "total": len(result)}), 200
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    followed = current_user.followed_authors
+    result = [author.to_dict() for author in followed]
+    return jsonify({"authors": result, "total": len(result)}), 200
 
 
 @author_bp.route("/<int:author_id>/toggle-follow", methods=["POST"])
@@ -73,7 +64,6 @@ def get_followed_authors(current_user: User):
 def toggle_follow_author(current_user: User, author_id: int):
     """
     Додає або видаляє підписку на автора для поточного користувача.
-    Це "акуратна" версія, що працює з M2M-таблицею.
     """
     author_repo = get_author_repo()
     author = author_repo.get_by(id=author_id)

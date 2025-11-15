@@ -1,9 +1,10 @@
+from http.client import HTTPException
 from dotenv import load_dotenv
 import os
 from flask_cors import CORS
 from flask_migrate import Migrate
 from database import IDatabaseConnection
-from flask import Flask, current_app, g
+from flask import Flask, current_app, g, jsonify
 from flask_jwt_extended import JWTManager
 from di.container import configure_dependencies
 from blueprints import (
@@ -75,6 +76,24 @@ def create_app(config_name="default"):
     @app.route("/")
     def hello():
         return {"message": "News API is running!", "config": config_name}
+
+    @app.errorhandler(ValueError)
+    def handle_value_error(e):
+        return jsonify({"msg": str(e)}), 404
+
+    @app.errorhandler(PermissionError)
+    def handle_permission_error(e):
+        return jsonify({"msg": str(e)}), 403
+
+    @app.errorhandler(HTTPException)
+    def handle_http_exception(e):
+        return jsonify({"msg": e.description}), e.code
+
+    @app.errorhandler(Exception)
+    def handle_generic_exception(e):
+        """Обробляє всі інші помилки (500)."""
+        print(f"Unhandled exception: {e}")
+        return jsonify({"msg": "Internal Server Error"}), 500
 
     return app
 

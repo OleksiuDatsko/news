@@ -3,6 +3,7 @@ from models.user import User
 from sqlalchemy.orm import Session
 from sqlalchemy import asc
 
+
 class UserRepository(BaseRepository):
     def __init__(self, db_session: Session):
         super().__init__(db_session, User)
@@ -25,8 +26,5 @@ class UserRepository(BaseRepository):
         Отримує пагінований список користувачів, сортованих за username.
         """
         return self.get_all_paginated(
-            page=page,
-            per_page=per_page,
-            order_by_col="username",
-            order_desc=False
+            page=page, per_page=per_page, order_by_col="username", order_desc=False
         )

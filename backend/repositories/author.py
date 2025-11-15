@@ -3,6 +3,7 @@ from models.author import Author
 from sqlalchemy.orm import Session
 from sqlalchemy import asc, or_
 
+
 class AuthorRepository(BaseRepository):
     def __init__(self, db_session: Session):
         super().__init__(db_session, Author)
@@ -19,19 +20,18 @@ class AuthorRepository(BaseRepository):
                 or_(
                     self.model.first_name.ilike(search_term),
                     self.model.last_name.ilike(search_term),
-                    self.model.bio.ilike(search_term)
+                    self.model.bio.ilike(search_term),
                 )
             )
-        
+
         total = query.count()
         offset = (page - 1) * per_page
 
         authors = (
-            query
-            .order_by(asc(self.model.last_name))
+            query.order_by(asc(self.model.last_name))
             .offset(offset)
             .limit(per_page)
             .all()
         )
-        
+
         return authors, total

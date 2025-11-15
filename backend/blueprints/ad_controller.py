@@ -1,66 +1,63 @@
 from flask import Blueprint, request, jsonify
-from middleware.auth_middleware import admin_token_required, token_optional
-from repositories import get_ad_repo
+from middleware.auth_middleware import token_optional
+from repositories import get_ad_repo, get_ad_view_repo
 from services.ad_service import AdService
 
 ad_bp = Blueprint("ad_public", __name__)
 
 
 @ad_bp.route("/", methods=["GET"])
-@admin_token_required
-def get_all_ads(current_admin):
-    """Отримує всі рекламні оголошення"""
-    page = request.args.get("page", 1, type=int)
-    per_page = request.args.get("per_page", 10, type=int)
-    status = request.args.get("status")  # active, inactive, expired
-    ad_type = request.args.get("type")
-
-    try:
-        ad_service = AdService(get_ad_repo())
-
-        result, total = ad_service.get_paginated_ads_for_admin(
-            page=page, per_page=per_page, status=status, ad_type=ad_type
-        )
-
-        return (
-            jsonify(
-                {
-                    "ads": result,
-                    "page": page,
-                    "per_page": per_page,
-                    "total": total,
-                    "filters": {"status": status, "type": ad_type},
-                }
-            ),
-            200,
-        )
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
-
-
-@ad_bp.route("/<int:ad_id>", methods=["GET"])
 @token_optional
-def get_ad_by_id(current_user, ad_id):
+def get_ads(current_user):
+    ad_type = request.args.get("type")
+    limit = request.args.get("limit", 5, type=int)
+    strategy = request.args.get("strategy", "default")
 
     ad_repo = get_ad_repo()
     ad_service = AdService(ad_repo)
 
     user_permissions = current_user.permissions if current_user else {}
 
-    try:
-        ad = ad_repo.get_by(id=ad_id)
+    ads = ad_service.get_ads_for_user(
+        ad_type=ad_type,
+        user_permissions=user_permissions,
+        limit=limit,
+        strategy=strategy,
+    )
 
-        return (
-            jsonify(
-                {
-                    "ad": ad.to_dict(),
-                    "show_ads": ad_service.should_show_ads(user_permissions),
-                }
-            ),
-            200,
-        )
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    result = [ad.to_dict() for ad in ads]
+    return (
+        jsonify(
+            {
+                "ads": result,
+                "show_ads": ad_service.should_show_ads(user_permissions),
+            }
+        ),
+        200,
+    )
+
+
+@ad_bp.route("/<int:ad_id>", methods=["GET"])
+@token_optional
+def get_ad_by_id(current_user, ad_id):
+    ad_repo = get_ad_repo()
+    ad_service = AdService(ad_repo)
+
+    user_permissions = current_user.permissions if current_user else {}
+    ad = ad_repo.get_by(id=ad_id)
+
+    if not ad:
+        raise ValueError(f"Рекламне оголошення з ID {ad_id} не знайдено")
+
+    return (
+        jsonify(
+            {
+                "ad": ad.to_dict(),
+                "show_ads": ad_service.should_show_ads(user_permissions),
+            }
+        ),
+        200,
+    )
 
 
 @ad_bp.route("/by-placement", methods=["GET"])
@@ -82,30 +79,26 @@ def get_ads_by_placement(current_user):
     else:
         placements = ["banner", "sidebar", "popup", "inline", "video"]
 
-    try:
-        print("Requested placements:", placements)
-        print("Using strategy:", strategy)
-        ads = ad_service.get_ads_by_placement(
-            user_permissions=user_permissions,
-            placements=placements,
-            strategy=strategy,
-        )
+    ads = ad_service.get_ads_by_placement(
+        user_permissions=user_permissions,
+        placements=placements,
+        strategy=strategy,
+    )
 
-        result = {
-            placement: [ad.to_dict() for ad in ads] for placement, ads in ads.items()
-        }
+    result = {
+        placement: [ad.to_dict() for ad in ads_list]
+        for placement, ads_list in ads.items()
+    }
 
-        return (
-            jsonify(
-                {
-                    "placements": result,
-                    "show_ads": ad_service.should_show_ads(user_permissions),
-                }
-            ),
-            200,
-        )
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    return (
+        jsonify(
+            {
+                "placements": result,
+                "show_ads": ad_service.should_show_ads(user_permissions),
+            }
+        ),
+        200,
+    )
 
 
 @ad_bp.route("/<int:ad_id>/impression", methods=["POST"])
@@ -116,22 +109,17 @@ def record_impression(current_user, ad_id):
     ad_repo = get_ad_repo()
     ad_service = AdService(ad_repo)
 
-    try:
-        success = ad_service.record_impression(
-            ad_id=ad_id,
-            user_id=current_user.id if current_user else None,
-            session_id=data.get("session_id"),
-            ip_address=request.remote_addr,
-        )
+    success = ad_service.record_impression(
+        ad_id=ad_id,
+        user_id=current_user.id if current_user else None,
+        session_id=data.get("session_id"),
+        ip_address=request.remote_addr,
+    )
 
-        if success:
-            return jsonify({"msg": "Показ зареєстровано"}), 200
-        else:
-            return jsonify({"msg": "Помилка при реєстрації показу"}), 500
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 404
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    if success:
+        return jsonify({"msg": "Показ зареєстровано"}), 200
+    else:
+        return jsonify({"msg": "Помилка при реєстрації показу"}), 500
 
 
 @ad_bp.route("/<int:ad_id>/click", methods=["GET"])
@@ -139,14 +127,9 @@ def record_click(ad_id):
     ad_repo = get_ad_repo()
     ad_service = AdService(ad_repo)
 
-    try:
-        success = ad_service.record_click(ad_id)
+    success = ad_service.record_click(ad_id)
 
-        if success:
-            return jsonify({"msg": "Клік зареєстровано"}), 200
-        else:
-            return jsonify({"msg": "Помилка при реєстрації кліку"}), 500
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 404
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    if success:
+        return jsonify({"msg": "Клік зареєстровано"}), 200
+    else:
+        return jsonify({"msg": "Помилка при реєстрації кліку"}), 500

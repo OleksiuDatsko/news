@@ -14,13 +14,8 @@ def get_comments(article_id):
 
     service = CommentService(get_comment_repo(), get_article_repo())
 
-    try:
-        comments = service.get_comments_for_article(article_id, page, per_page)
-        return jsonify({"comments": comments}), 200
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 404
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    comments = service.get_comments_for_article(article_id, page, per_page)
+    return jsonify({"comments": comments}), 200
 
 
 @comment_bp.route("/articles/<int:article_id>/comments", methods=["POST"])
@@ -36,13 +31,8 @@ def create_comment(current_user, article_id):
 
     service = CommentService(get_comment_repo(), get_article_repo())
 
-    try:
-        comment = service.create_comment(current_user.id, article_id, text)
-        return jsonify(comment), 201
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 400
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    comment = service.create_comment(current_user.id, article_id, text)
+    return jsonify(comment), 201
 
 
 @comment_bp.route("/comments/<int:comment_id>", methods=["GET"])
@@ -51,13 +41,8 @@ def get_comment_by_id(current_user, comment_id):
     """Отримує коментар за ID"""
     service = CommentService(get_comment_repo(), get_article_repo())
 
-    try:
-        comment = service.get_comment_by_id(comment_id)
-        return jsonify(comment), 200
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 404
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    comment = service.get_comment_by_id(comment_id)
+    return jsonify(comment), 200
 
 
 @comment_bp.route("/comments/<int:comment_id>", methods=["PUT"])
@@ -72,15 +57,8 @@ def update_comment(current_user, comment_id):
 
     service = CommentService(get_comment_repo(), get_article_repo())
 
-    try:
-        updated = service.update_comment(current_user.id, comment_id, text)
-        return jsonify(updated), 200
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 404
-    except PermissionError as e:
-        return jsonify({"msg": str(e)}), 403
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    updated = service.update_comment(current_user.id, comment_id, text)
+    return jsonify(updated), 200
 
 
 @comment_bp.route("/comments/<int:comment_id>", methods=["DELETE"])
@@ -89,14 +67,5 @@ def delete_comment(current_user, comment_id):
     """Видаляє коментар"""
     service = CommentService(get_comment_repo(), get_article_repo())
 
-    try:
-        result = service.delete_comment(
-            current_user.id, comment_id, current_user.is_admin
-        )
-        return jsonify(result), 200
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 404
-    except PermissionError as e:
-        return jsonify({"msg": str(e)}), 403
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    result = service.delete_comment(current_user.id, comment_id, current_user.is_admin)
+    return jsonify(result), 200

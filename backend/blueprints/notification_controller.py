@@ -1,80 +1,48 @@
-from flask import Blueprint, jsonify, request
-from models.push_subscription import PushSubscription
+from flask import Blueprint, request, jsonify, g
 from middleware.auth_middleware import token_required
 from repositories import get_notification_repo
+from models.push_subscription import PushSubscription
 
 notification_bp = Blueprint("notification", __name__)
 
 
 @notification_bp.route("/", methods=["GET"])
 @token_required
-def get_notifications(current_user):
-    """Отримує останні 10 непрочитаних сповіщень для поточного користувача."""
-    if current_user.is_admin:
-        return jsonify({"notifications": [], "unread_count": 0}), 200
-
+def get_unread(current_user):
+    """Отримує останні 5 непрочитаних сповіщень"""
     repo = get_notification_repo()
-    unread_notifications = repo.get_unread_by_user(current_user.id, limit=10)
+    notifications = repo.get_unread_by_user(current_user.id, limit=5)
+    unread_count = (
+        repo.db_session.query(repo.model)
+        .filter_by(user_id=current_user.id, is_read=False)
+        .count()
+    )
 
-    result = [n.to_dict() for n in unread_notifications]
-    return jsonify({"notifications": result, "unread_count": len(result)}), 200
-
-
-@notification_bp.route("/<int:notification_id>/read", methods=["POST"])
-@token_required
-def mark_as_read(current_user, notification_id):
-    """Позначає одне сповіщення як прочитане."""
-    if current_user.is_admin:
-        return jsonify({"msg": "Адмін не має сповіщень"}), 403
-
-    repo = get_notification_repo()
-    notification = repo.mark_as_read(notification_id, current_user.id)
-
-    if not notification:
-        return (
-            jsonify({"msg": "Сповіщення не знайдено або належить іншому користувачу"}),
-            404,
-        )
-
-    return jsonify(notification.to_dict()), 200
-
-
-@notification_bp.route("/read-all", methods=["POST"])
-@token_required
-def mark_all_as_read(current_user):
-    """Позначає всі сповіщення користувача як прочитані."""
-    if current_user.is_admin:
-        return jsonify({"msg": "Адмін не має сповіщень"}), 403
-
-    repo = get_notification_repo()
-    repo.mark_all_as_read(current_user.id)
-
-    return jsonify({"msg": "Всі сповіщення позначено як прочитані"}), 200
+    return (
+        jsonify(
+            {
+                "notifications": [n.to_dict() for n in notifications],
+                "unread_count": unread_count,
+            }
+        ),
+        200,
+    )
 
 
 @notification_bp.route("/all", methods=["GET"])
 @token_required
-def get_all_notifications(current_user):
-    """Отримує ВСІ сповіщення для користувача з пагінацією."""
-    if current_user.is_admin:
-        return (
-            jsonify({"notifications": [], "total": 0, "page": 1, "per_page": 10}),
-            200,
-        )
-
+def get_all(current_user):
+    """Отримує всі сповіщення з пагінацією"""
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
 
     repo = get_notification_repo()
-    notifications, total = repo.get_all_by_user(
-        current_user.id, page=page, per_page=per_page
-    )
+    notifications, total = repo.get_all_by_user(current_user.id, page, per_page)
 
-    result = [n.to_dict() for n in notifications]
     return (
         jsonify(
             {
-                "notifications": result,
+                "notifications": [n.to_dict() for n in notifications],
                 "total": total,
                 "page": page,
                 "per_page": per_page,
@@ -84,37 +52,58 @@ def get_all_notifications(current_user):
     )
 
 
+@notification_bp.route("/<int:notification_id>/read", methods=["POST"])
+@token_required
+def mark_as_read(current_user, notification_id):
+    """Позначає одне сповіщення як прочитане"""
+    repo = get_notification_repo()
+    notification = repo.mark_as_read(notification_id, current_user.id)
+
+    if not notification:
+        raise ValueError("Сповіщення не знайдено або вже прочитано")
+
+    return jsonify(notification.to_dict()), 200
+
+
+@notification_bp.route("/read-all", methods=["POST"])
+@token_required
+def mark_all_read(current_user):
+    """Позначає всі сповіщення як прочитані"""
+    repo = get_notification_repo()
+    repo.mark_all_as_read(current_user.id)
+    return jsonify({"msg": "Всі сповіщення позначено як прочитані"}), 200
+
+
 @notification_bp.route("/subscribe", methods=["POST"])
 @token_required
-def subscribe_to_push(current_user):
-    """
-    Підписує користувача на push-сповіщення.
-    """
+def subscribe(current_user):
+    """Підписує користувача на PUSH-сповіщення"""
     data = request.get_json()
-    if not data or not data.get("endpoint"):
-        return jsonify({"msg": "Необхідні дані підписки"}), 400
 
-    from flask import g
+    if not data or "endpoint" not in data:
+        return jsonify({"msg": "Невірні дані підписки"}), 400
 
-    existing = (
-        g.db_session.query(PushSubscription)
-        .filter_by(endpoint=data["endpoint"])
-        .first()
+    endpoint = data["endpoint"]
+    p256dh = data.get("keys", {}).get("p256dh")
+    auth = data.get("keys", {}).get("auth")
+
+    if not p256dh or not auth:
+        return jsonify({"msg": "Ключі підписки відсутні"}), 400
+
+    existing_sub = (
+        g.db_session.query(PushSubscription).filter_by(endpoint=endpoint).first()
     )
-    if existing:
+
+    if existing_sub:
+        if existing_sub.user_id != current_user.id:
+            existing_sub.user_id = current_user.id
+            g.db_session.commit()
         return jsonify({"msg": "Підписка вже існує"}), 200
 
-    try:
-        sub = PushSubscription(
-            user_id=current_user.id,
-            endpoint=data["endpoint"],
-            p256dh=data["keys"]["p256dh"],
-            auth=data["keys"]["auth"],
-        )
-        g.db_session.add(sub)
-        g.db_session.commit()
+    new_sub = PushSubscription(
+        user_id=current_user.id, endpoint=endpoint, p256dh=p256dh, auth=auth
+    )
+    g.db_session.add(new_sub)
+    g.db_session.commit()
 
-        return jsonify({"msg": "Підписка успішна"}), 201
-    except Exception as e:
-        g.db_session.rollback()
-        return jsonify({"msg": str(e)}), 500
+    return jsonify({"msg": "Підписка успішно створена"}), 201

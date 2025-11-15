@@ -30,31 +30,28 @@ def register():
     user_repo = get_user_repo()
     auth_service = AuthService(user_repo)
 
+    result = auth_service.register(
+        email=data.get("email"),
+        password=data.get("password"),
+        username=data.get("username"),
+    )
+
+    response = make_response(jsonify({"user": result["user"]}))
+
+    set_access_cookies(response, result["tokens"]["access_token"])
+    set_refresh_cookies(response, result["tokens"]["refresh_token"])
+
+    new_user_id = result["user"]["id"]
     try:
-        result = auth_service.register(
-            email=data.get("email"),
-            password=data.get("password"),
-            username=data.get("username"),
-        )
+        sub_repo = get_subscription_repo()
+        sub_service = SubscriptionService(sub_repo)
+        free_plan = sub_repo.get_by(name="Безкоштовний")
+        if free_plan:
+            sub_service.subscribe(new_user_id, free_plan.id)
+    except Exception as e:
+        print(f"Warning: Не вдалося підписати {new_user_id} на Free план: {e}")
 
-        response = make_response(jsonify({"user": result["user"]}))
-
-        set_access_cookies(response, result["tokens"]["access_token"])
-        set_refresh_cookies(response, result["tokens"]["refresh_token"])
-
-        new_user_id = result["user"]["id"]
-        try:
-            sub_repo = get_subscription_repo()
-            sub_service = SubscriptionService(sub_repo)
-            free_plan = sub_repo.get_by(name="Безкоштовний")
-            if free_plan:
-                sub_service.subscribe(new_user_id, free_plan.id)
-        except Exception as e:
-            print(f"Warning: Не вдалося підписати {new_user_id} на Free план: {e}")
-
-        return response, 201
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 400
+    return response, 201
 
 
 @auth_bp.route("/login", methods=["POST"])
@@ -63,18 +60,14 @@ def login():
     user_repo = get_user_repo()
     auth_service = AuthService(user_repo)
 
-    try:
-        result = auth_service.authenticate(data.get("email"), data.get("password"))
+    result = auth_service.authenticate(data.get("email"), data.get("password"))
 
-        response = make_response(jsonify({"user": result["user"]}))
+    response = make_response(jsonify({"user": result["user"]}))
 
-        set_access_cookies(response, result["tokens"]["access_token"])
-        set_refresh_cookies(response, result["tokens"]["refresh_token"])
+    set_access_cookies(response, result["tokens"]["access_token"])
+    set_refresh_cookies(response, result["tokens"]["refresh_token"])
 
-        return response, 200
-
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 401
+    return response, 200
 
 
 @auth_bp.route("/refresh", methods=["POST"])
@@ -119,12 +112,8 @@ def update_preferences(current_user):
         return jsonify({"msg": "Тіло запиту не може бути порожнім"}), 400
 
     user_repo = get_user_repo()
-    try:
-        updated_user = user_repo.update(current_user, {"preferences": data})
-
-        return jsonify({"user": updated_user.to_dict()}), 200
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    updated_user = user_repo.update(current_user, {"preferences": data})
+    return jsonify({"user": updated_user.to_dict()}), 200
 
 
 @auth_bp.route("/me/newsletter/toggle", methods=["POST"])

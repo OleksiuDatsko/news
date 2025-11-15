@@ -9,8 +9,10 @@ from sqlalchemy.orm import Session
 class AdRepository(BaseRepository):
     def __init__(self, db_session: Session):
         super().__init__(db_session, Ad)
-        
-    def get_paginated_ads(self, page: int, per_page: int, status: str | None, ad_type: str | None):
+
+    def get_paginated_ads(
+        self, page: int, per_page: int, status: str | None, ad_type: str | None
+    ):
         """
         Отримує пагінований список рекламних оголошень з фільтрами.
         """
@@ -20,7 +22,7 @@ class AdRepository(BaseRepository):
         if status == "active":
             query = query.filter(
                 self.model.is_active == True,
-                (self.model.end_date == None) | (self.model.end_date > current_time)
+                (self.model.end_date == None) | (self.model.end_date > current_time),
             )
         elif status == "inactive":
             query = query.filter(self.model.is_active == False)
@@ -33,14 +35,8 @@ class AdRepository(BaseRepository):
             query = query.filter(self.model.ad_type == ad_type)
 
         total = query.count()
-        
+
         offset = (page - 1) * per_page
-        ads = (
-            query
-            .order_by(desc(self.model.id))
-            .offset(offset)
-            .limit(per_page)
-            .all()
-        )
-        
+        ads = query.order_by(desc(self.model.id)).offset(offset).limit(per_page).all()
+
         return ads, total

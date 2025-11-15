@@ -5,6 +5,7 @@ from database import IDatabaseConnection
 from models.subscription import SubscriptionPlan, UserSubscriptionPlan
 from sqlalchemy import asc
 
+
 class SubscriptionRepository(BaseRepository):
     def __init__(self, db_session: Session):
         super().__init__(db_session, SubscriptionPlan)
@@ -20,7 +21,7 @@ class SubscriptionRepository(BaseRepository):
             page=page,
             per_page=per_page,
             order_by_col="price_per_month",
-            order_desc=False
+            order_desc=False,
         )
 
     def get_plan_by_id(self, plan_id: int):

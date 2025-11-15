@@ -21,13 +21,10 @@ def subscribe(current_user):
     if not plan_id:
         return jsonify(msg="plan_id is required"), 400
 
-    try:
-        sub = SubscriptionService(get_subscription_repo()).subscribe(
-            current_user.id, plan_id
-        )
-        return jsonify(sub.to_dict()), 201
-    except ValueError as e:
-        return jsonify(msg=str(e)), 404
+    sub = SubscriptionService(get_subscription_repo()).subscribe(
+        current_user.id, plan_id
+    )
+    return jsonify(sub.to_dict()), 201
 
 
 @subscription_bp.route("/me", methods=["GET"])
@@ -37,7 +34,7 @@ def my_subscription(current_user):
         current_user.id
     )
     if not sub:
-        return jsonify(msg="У вас немає активної підписки"), 404
+        raise ValueError("У вас немає активної підписки")
     return jsonify(sub.to_dict()), 200
 
 
@@ -48,6 +45,6 @@ def subscription_history(current_user):
         current_user.id
     )
     if not subs:
-        return jsonify(msg="У вас немає історії підписок"), 404
+        return jsonify([]), 200
     result = [sub.to_dict() for sub in subs]
     return jsonify(result), 200

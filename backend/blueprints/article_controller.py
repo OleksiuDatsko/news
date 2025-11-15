@@ -34,25 +34,22 @@ def get_articles(current_user, ads=[]):
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
 
-    try:
-        articles, total = article_service.get_articles(
-            page=page, per_page=per_page, filters=filters
-        )
-        result = [article.to_dict(metadata=True) for article in articles]
-        return (
-            jsonify(
-                {
-                    "articles": result,
-                    "ads": ads,
-                    "page": page,
-                    "per_page": per_page,
-                    "total": total,
-                }
-            ),
-            200,
-        )
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    articles, total = article_service.get_articles(
+        page=page, per_page=per_page, filters=filters
+    )
+    result = [article.to_dict(metadata=True) for article in articles]
+    return (
+        jsonify(
+            {
+                "articles": result,
+                "ads": ads,
+                "page": page,
+                "per_page": per_page,
+                "total": total,
+            }
+        ),
+        200,
+    )
 
 
 @article_bp.route("/recommended", methods=["GET"])
@@ -60,8 +57,6 @@ def get_articles(current_user, ads=[]):
 @ads_injector(ad_type="inline")
 def get_recommended_articles(current_user, ads=[]):
     """Отримує рекомендовані статті на основі уподобань ТА АКТИВНОСТІ користувача"""
-    if current_user.is_admin:
-        return jsonify({"msg": "Адмін не має доступу"}), 418
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 5, type=int)
     status = request.args.get("satus", "published", type=str)
@@ -77,30 +72,27 @@ def get_recommended_articles(current_user, ads=[]):
     if not getattr(current_user, "permissions", {}).get("exclusive_content", False):
         filters["is_exclusive"] = False
 
-    try:
-        articles, total = article_service.get_recommended_articles(
-            user_id=current_user.id,
-            page=page,
-            per_page=per_page,
-            favorite_category_slugs=fav_category_slugs,
-            filters=filters,
-        )
+    articles, total = article_service.get_recommended_articles(
+        user_id=current_user.id,
+        page=page,
+        per_page=per_page,
+        favorite_category_slugs=fav_category_slugs,
+        filters=filters,
+    )
 
-        result = [article.to_dict(metadata=True) for article in articles]
-        return (
-            jsonify(
-                {
-                    "articles": result,
-                    "ads": ads,
-                    "page": page,
-                    "per_page": per_page,
-                    "total": total,
-                }
-            ),
-            200,
-        )
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    result = [article.to_dict(metadata=True) for article in articles]
+    return (
+        jsonify(
+            {
+                "articles": result,
+                "ads": ads,
+                "page": page,
+                "per_page": per_page,
+                "total": total,
+            }
+        ),
+        200,
+    )
 
 
 @article_bp.route("/search", methods=["GET"])
@@ -118,37 +110,33 @@ def search_articles(current_user):
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
 
-    try:
-        user_permissions = current_user.permissions if current_user else {}
+    user_permissions = current_user.permissions if current_user else {}
 
-        articles, total = article_service.search_articles(
-            query,
-            page,
-            per_page,
-            user_permissions=user_permissions,
-            date_from=date_from,
-            date_to=date_to,
-        )
+    articles, total = article_service.search_articles(
+        query,
+        page,
+        per_page,
+        user_permissions=user_permissions,
+        date_from=date_from,
+        date_to=date_to,
+    )
 
-        result = [article.to_dict(metadata=True) for article in articles]
+    result = [article.to_dict(metadata=True) for article in articles]
 
-        return (
-            jsonify(
-                {
-                    "articles": result,
-                    "query": query,
-                    "page": page,
-                    "per_page": per_page,
-                    "total": total,
-                    "date_from": date_from,
-                    "date_to": date_to,
-                }
-            ),
-            200,
-        )
-
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    return (
+        jsonify(
+            {
+                "articles": result,
+                "query": query,
+                "page": page,
+                "per_page": per_page,
+                "total": total,
+                "date_from": date_from,
+                "date_to": date_to,
+            }
+        ),
+        200,
+    )
 
 
 @article_bp.route("/<int:article_id>", methods=["GET"])
@@ -159,21 +147,17 @@ def get_article(current_user, ads, article_id):
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
 
-    try:
-        if current_user:
-            article = article_service.get_article_by_id(article_id, current_user.id)
-        else:
-            article = article_service.get_article_by_id(article_id)
-        if not getattr(current_user, "permissions", {}).get(
-            "exclusive_content", False
-        ) and article.get("is_exclusive", False):
-            return (
-                jsonify({"msg": "Недостатньо прав для доступу до цього ресурсу"}),
-                403,
-            )
-        return jsonify({**article, "ads": ads}), 200
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 404
+    if current_user:
+        article = article_service.get_article_by_id(article_id, current_user.id)
+    else:
+        article = article_service.get_article_by_id(article_id)
+
+    if not getattr(current_user, "permissions", {}).get(
+        "exclusive_content", False
+    ) and article.get("is_exclusive", False):
+        raise PermissionError("Недостатньо прав для доступу до цього ресурсу")
+
+    return jsonify({**article, "ads": ads}), 200
 
 
 @article_bp.route("/<int:article_id>/impression", methods=["POST"])
@@ -184,23 +168,17 @@ def record_article_impression(current_user, article_id):
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
 
-    try:
-        success = article_service.record_article_impression(
-            article_id=article_id,
-            user_id=current_user.id if current_user else None,
-            session_id=data.get("session_id"),
-            ip_address=request.remote_addr,
-        )
+    success = article_service.record_article_impression(
+        article_id=article_id,
+        user_id=current_user.id if current_user else None,
+        session_id=data.get("session_id"),
+        ip_address=request.remote_addr,
+    )
 
-        if success:
-            return jsonify({"msg": "Показ статті зареєстровано"}), 200
-        else:
-            return jsonify({"msg": "Помилка при реєстрації показу"}), 500
-
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 404
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    if success:
+        return jsonify({"msg": "Показ статті зареєстровано"}), 200
+    else:
+        return jsonify({"msg": "Помилка при реєстрації показу"}), 500
 
 
 @article_bp.route("/<int:article_id>/save", methods=["POST"])
@@ -211,11 +189,8 @@ def save_article(current_user, article_id):
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
 
-    try:
-        result = article_service.save_article(current_user.id, article_id)
-        return jsonify(result), 200
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 404
+    result = article_service.save_article(current_user.id, article_id)
+    return jsonify(result), 200
 
 
 @article_bp.route("/<int:article_id>/unsave", methods=["POST"])
@@ -226,11 +201,8 @@ def unsave_article(current_user, article_id):
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
 
-    try:
-        result = article_service.unsave_article(current_user.id, article_id)
-        return jsonify(result), 200
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 404
+    result = article_service.unsave_article(current_user.id, article_id)
+    return jsonify(result), 200
 
 
 @article_bp.route("/<int:article_id>/toggle-save", methods=["POST"])
@@ -241,16 +213,13 @@ def toggle_save_article(current_user, article_id):
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
 
-    try:
-        result = article_service.toggle_save_article(current_user.id, article_id)
-        return jsonify(result), 200
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 404
+    result = article_service.toggle_save_article(current_user.id, article_id)
+    return jsonify(result), 200
 
 
 @article_bp.route("/<int:article_id>/toggle-like", methods=["POST"])
 @token_required
-def toggle_like_article(current_user, article_id):
+def toggle_like_article(current_user):
     """Перемикає статус лайка статті"""
     if current_user.is_admin:
         return jsonify({"msg": "Адмін не може оцінювати статті"}), 403
@@ -258,11 +227,8 @@ def toggle_like_article(current_user, article_id):
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
 
-    try:
-        result = article_service.toggle_like_article(current_user.id, article_id)
-        return jsonify(result), 200
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 404
+    result = article_service.toggle_like_article(current_user.id, article_id)
+    return jsonify(result), 200
 
 
 @article_bp.route("/saved", methods=["GET"])
@@ -276,13 +242,10 @@ def get_saved_articles(current_user):
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
 
-    try:
-        articles = article_service.get_saved_articles(current_user.id, page, per_page)
-        if get_all_ids:
-            articles = [article.get("id") for article in articles]
-        return jsonify(articles), 200
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    articles = article_service.get_saved_articles(current_user.id, page, per_page)
+    if get_all_ids:
+        articles = [article.get("id") for article in articles]
+    return jsonify(articles), 200
 
 
 @article_bp.route("/liked", methods=["GET"])
@@ -295,8 +258,5 @@ def get_liked_articles(current_user):
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
 
-    try:
-        articles = article_service.get_liked_articles(current_user.id, page, per_page)
-        return jsonify(articles), 200
-    except Exception as e:
-        return jsonify({"msg": str(e)}), 500
+    articles = article_service.get_liked_articles(current_user.id, page, per_page)
+    return jsonify(articles), 200

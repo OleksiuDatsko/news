@@ -26,14 +26,11 @@ def register(current_admin):
     admin_repo = get_admin_repo()
     auth_service = AuthService(admin_repo)
 
-    try:
-        result = auth_service.register(
-            email=data.get("email"),
-            password=data.get("password"),
-        )
-        return jsonify(result), 201
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 400
+    result = auth_service.register(
+        email=data.get("email"),
+        password=data.get("password"),
+    )
+    return jsonify(result), 201
 
 
 @auth_bp.route("/login", methods=["POST"])
@@ -42,16 +39,13 @@ def login():
     admin_repo = get_admin_repo()
     auth_service = AuthService(admin_repo)
 
-    try:
-        result = auth_service.authenticate(data.get("email"), data.get("password"))
-        response = make_response(jsonify({"admin": result["admin"]}))
+    result = auth_service.authenticate(data.get("email"), data.get("password"))
+    response = make_response(jsonify({"admin": result["admin"]}))
 
-        set_access_cookies(response, result["tokens"]["access_token"])
-        set_refresh_cookies(response, result["tokens"]["refresh_token"])
+    set_access_cookies(response, result["tokens"]["access_token"])
+    set_refresh_cookies(response, result["tokens"]["refresh_token"])
 
-        return response, 200
-    except ValueError as e:
-        return jsonify({"msg": str(e)}), 401
+    return response, 200
 
 
 @auth_bp.route("/refresh", methods=["POST"])
