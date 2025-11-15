@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import List, Optional, Dict
-from sqlalchemy.orm import Session
 from services.ad_strategy import (
     AdSelectionStrategy,
     DefaultAdStrategy,
@@ -154,3 +153,30 @@ class AdService:
             "is_active": ad.is_active,
             "ad_type": ad.ad_type,
         }
+        
+    def get_paginated_ads_for_admin(self, page: int, per_page: int, status: str | None, ad_type: str | None):
+        """
+        Отримує пагінований список оголошень для адмін-панелі.
+        """
+        ads, total = self.ad_repo.get_paginated_ads(
+            page=page, per_page=per_page, status=status, ad_type=ad_type
+        )
+
+        result = []
+        for ad in ads:
+            ad_data = ad.to_dict()
+            
+            ad_data["ctr"] = (
+                round((ad.clicks_count / ad.impressions_count * 100), 2)
+                if ad.impressions_count > 0
+                else 0
+            )
+            ad_data["status"] = "inactive" # Default
+            if ad.is_active and (not ad.end_date or ad.end_date > datetime.now()):
+                ad_data["status"] = "active"
+            if ad.end_date and ad.end_date < datetime.now():
+                ad_data["status"] = "expired"
+
+            result.append(ad_data)
+
+        return result, total

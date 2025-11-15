@@ -1,37 +1,35 @@
 from flask import Blueprint, request, jsonify
-from middleware.auth_middleware import token_optional
-from repositories import get_ad_repo, get_ad_view_repo
+from middleware.auth_middleware import admin_token_required, token_optional
+from repositories import get_ad_repo
 from services.ad_service import AdService
 
 ad_bp = Blueprint("ad_public", __name__)
 
 
 @ad_bp.route("/", methods=["GET"])
-@token_optional
-def get_ads(current_user):
+@admin_token_required
+def get_all_ads(current_admin):
+    """Отримує всі рекламні оголошення"""
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 10, type=int)
+    status = request.args.get("status")  # active, inactive, expired
     ad_type = request.args.get("type")
-    limit = request.args.get("limit", 5, type=int)
-    strategy = request.args.get("strategy", "default")
-
-    ad_repo = get_ad_repo()
-    ad_service = AdService(ad_repo)
-
-    user_permissions = current_user.permissions if current_user else {}
 
     try:
-        ads = ad_service.get_ads_for_user(
-            ad_type=ad_type,
-            user_permissions=user_permissions,
-            limit=limit,
-            strategy=strategy,
+        ad_service = AdService(get_ad_repo())
+
+        result, total = ad_service.get_paginated_ads_for_admin(
+            page=page, per_page=per_page, status=status, ad_type=ad_type
         )
 
-        result = [ad.to_dict() for ad in ads]
         return (
             jsonify(
                 {
                     "ads": result,
-                    "show_ads": ad_service.should_show_ads(user_permissions),
+                    "page": page,
+                    "per_page": per_page,
+                    "total": total,
+                    "filters": {"status": status, "type": ad_type},
                 }
             ),
             200,

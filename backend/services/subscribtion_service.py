@@ -1,3 +1,4 @@
+from typing import Any, List, Tuple, Dict
 from repositories.subscription import SubscriptionRepository
 
 
@@ -19,3 +20,8 @@ class SubscriptionService:
 
     def get_subscription_history(self, user_id: int):
         return self.repo.get_user_subscription_history(user_id)
+
+    def get_paginated_plans(self, page: int, per_page: int) -> Tuple[List[Dict[str, Any]], int]:
+        plans, total = self.repo.get_paginated_plans(page=page, per_page=per_page)
+        result = [plan.to_dict() for plan in plans]
+        return result, total

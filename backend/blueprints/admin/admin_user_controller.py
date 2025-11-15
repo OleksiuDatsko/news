@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash
+from services.admin_user_service import AdminUserService
 from middleware.auth_middleware import admin_token_required
 from repositories import get_admin_repo
 
@@ -10,15 +11,24 @@ admin_user_bp = Blueprint("admin_user", __name__)
 @admin_token_required
 def get_all_admin_users(current_admin):
     """Отримує всіх адміністраторів"""
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 15, type=int)
+
     try:
-        admin_repo = get_admin_repo()
-        admin_users = admin_repo.get_all()
+        admin_service = AdminUserService(get_admin_repo())
+        result, total = admin_service.get_admins_paginated(page=page, per_page=per_page)
 
-        result = []
-        for admin in admin_users:
-            result.append(admin.to_dict())
-
-        return jsonify({"admin_users": result, "total": len(result)}), 200
+        return (
+            jsonify(
+                {
+                    "admin_users": result,
+                    "total": total,
+                    "page": page,
+                    "per_page": per_page,
+                }
+            ),
+            200,
+        )
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
 

@@ -20,6 +20,8 @@ def token_required(f):
             current_user = AdminAuthService(get_admin_repo()).get_current_admin(
                 current_id
             )
+            current_user.permissions = {}
+            current_user.preferences = {}
 
         return f(current_user, *args, **kwargs)
 

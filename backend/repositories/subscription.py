@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from repositories.repositories import BaseRepository
 from database import IDatabaseConnection
 from models.subscription import SubscriptionPlan, UserSubscriptionPlan
-
+from sqlalchemy import asc
 
 class SubscriptionRepository(BaseRepository):
     def __init__(self, db_session: Session):
@@ -11,6 +11,17 @@ class SubscriptionRepository(BaseRepository):
 
     def get_all_plans(self):
         return self.get_all()
+
+    def get_paginated_plans(self, page: int, per_page: int):
+        """
+        Отримує пагінований список планів, сортованих за ціною.
+        """
+        return self.get_all_paginated(
+            page=page,
+            per_page=per_page,
+            order_by_col="price_per_month",
+            order_desc=False
+        )
 
     def get_plan_by_id(self, plan_id: int):
         return self.get_by(id=plan_id)

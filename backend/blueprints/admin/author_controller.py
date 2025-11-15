@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from services.author_admin_service import AuthorAdminService
 from middleware.auth_middleware import admin_token_required
 from repositories import get_author_repo, get_article_repo
 
@@ -10,26 +11,14 @@ author_bp = Blueprint("author", __name__)
 def get_all_authors(current_admin):
     """Отримує всіх авторів"""
     page = request.args.get("page", 1, type=int)
-    per_page = request.args.get("per_page", 1000, type=int)
+    per_page = request.args.get("per_page", 15, type=int)
     search = request.args.get("search", "")
 
     try:
-        author_repo = get_author_repo()
-        authors = author_repo.get_all()
-
-        if search:
-            search_lower = search.lower()
-            authors = [
-                author
-                for author in authors
-                if search_lower in author.first_name.lower()
-                or search_lower in author.last_name.lower()
-                or (author.bio and search_lower in author.bio.lower())
-            ]
-
-        start = (page - 1) * per_page
-        end = start + per_page
-        paginated_authors = [author.to_dict() for author in authors[start:end]]
+        author_service = AuthorAdminService(get_author_repo())
+        paginated_authors, total = author_service.get_authors_paginated(
+            page=page, per_page=per_page, search=search
+        )
 
         return (
             jsonify(
@@ -37,7 +26,7 @@ def get_all_authors(current_admin):
                     "authors": paginated_authors,
                     "page": page,
                     "per_page": per_page,
-                    "total": len(authors),
+                    "total": total,
                     "search": search,
                 }
             ),

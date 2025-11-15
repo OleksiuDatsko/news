@@ -60,6 +60,8 @@ def get_articles(current_user, ads=[]):
 @ads_injector(ad_type="inline")
 def get_recommended_articles(current_user, ads=[]):
     """Отримує рекомендовані статті на основі уподобань ТА АКТИВНОСТІ користувача"""
+    if current_user.is_admin:
+        return jsonify({"msg": "Адмін не має доступу"}), 418
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 5, type=int)
     status = request.args.get("satus", "published", type=str)

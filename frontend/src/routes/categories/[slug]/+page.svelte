@@ -2,12 +2,12 @@
   import type { PageData } from './$types';
   import ArticleCard from '$lib/components/ui/cards/ArticleCard.svelte';
   import AdCard from '$lib/components/ui/cards/AdCard.svelte';
+  import Pagination from '$lib/components/ui/Pagination.svelte';
 
   let { data }: { data: PageData } = $props();
 
   let categoryName = $state('Категорія не знайдена');
   let categoryDescription = $state('');
-
   $effect(() => {
     categoryName = data.category?.name ?? 'Категорія не знайдена';
     categoryDescription = data.category?.description ?? '';
@@ -34,6 +34,12 @@
         {#each data.articles as article (article.id)}
           <ArticleCard {article} />
         {/each}
+
+        <Pagination
+          currentPage={data.page}
+          perPage={data.perPage}
+          totalItems={data.total}
+        />
       {:else}
         <div class="bg-white p-12 rounded-lg shadow-md text-center">
           <p class="text-gray-600 text-lg">Наразі немає опублікованих статей у цій категорії.</p>
