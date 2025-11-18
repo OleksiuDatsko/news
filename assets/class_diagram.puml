@@ -1,0 +1,437 @@
+@startuml Class Diagram
+
+!define ENTITY_COLOR F1F8E9
+!define SERVICE_COLOR FFF3E0
+!define REPO_COLOR E1F5FE
+
+!define PATTERN_COLOR F3E5F5
+!define FACTORY_COLOR E1BEE7
+!define STRATEGY_COLOR C8E6C9
+!define OBSERVER_COLOR B3E5FC
+
+skinparam shadowing false
+skinparam handwritten false
+skinparam packageStyle rectangle
+skinparam defaultFontName "Segoe UI, Arial"
+skinparam classArrowColor #666666
+skinparam classBorderColor #888888
+skinparam linetype polyline
+
+
+
+package "Business Logic (Services)" <<Services>> #SERVICE_COLOR {
+
+    class ArticleService <<Service>> {
+        - articlerepo: ArticleRepository
+        --
+        + getarticles(page, perpage, filters)
+        + searcharticles(query, page, perpage)
+        + getarticlebyid(articleid, userid)
+        + togglelikearticle(userid, articleid)
+        + togglesavearticle(userid, articleid)
+        + getrecommendedarticles(userid, page)
+    }
+
+    class AdService <<Service>> {
+        - adrepo: AdRepository
+        - strategies: Dict
+        --
+        + getadsforuser(adtype, permissions)
+        + getadsbyplacement(permissions)
+        + recordimpression(adid, userid)
+        + recordclick(adid)
+        + shouldshowads(permissions)
+    }
+
+    class SubscriptionService <<Service>> {
+        - repo: SubscriptionRepository
+        --
+        + listplans()
+        + subscribe(userid, planid)
+        + getcurrentsubscription(userid)
+        + getsubscriptionhistory(userid)
+    }
+
+    class CommentService <<Service>> {
+        - commentrepo: CommentRepository
+        - articlerepo: ArticleRepository
+        --
+        + getcommentsforarticle(articleid)
+        + createcomment(userid, articleid, text)
+        + updatecomment(commentid, text)
+        + deletecomment(commentid)
+    }
+
+    class UserAuthService <<Service>> {
+        - repo: UserRepository
+        - tokenproducer: TokenFactoryProducer
+        --
+        + register(email, password, username): Dict
+        + authenticate(email, password): Dict
+        + refresh(user): Dict
+        + getcurrentuser(userid): User
+    }
+
+    class AdminAuthService <<Service>> {
+        - repo: AdminRepository
+        - tokenproducer: TokenFactoryProducer
+        --
+        + register(email, password): Dict
+        + authenticate(email, password): Dict
+        + refresh(user): Dict
+        + getcurrentadmin(adminid): Admin
+    }
+}
+
+
+package "Data Access (Repositories)" <<Repositories>> #REPO_COLOR {
+
+    class BaseRepository <<Repository>> {
+        +dbsession: Session
+        +model
+        --
+        +getby(**kwargs)
+        +getall()
+        +getallby(**kwargs)
+        +create(data)
+        +update(instance, data)
+        +delete(instance)
+    }
+
+    class UserRepository <<Repository>> {
+        +getbyemail(email)
+    }
+    class AdminRepository <<Repository>>
+    class ArticleRepository <<Repository>> {
+        +getall(page, perpage, filters)
+        +search(querystring, page, perpage)
+        +savearticle(userid, articleid)
+        +togglelikearticle(userid, articleid)
+        +getsavedarticles(userid)
+        +getrecommended(userid, page)
+    }
+    class AuthorRepository <<Repository>>
+    class CategoryRepository <<Repository>>
+    class CommentRepository <<Repository>> {
+        +getbyarticle(articleid, page)
+    }
+    class SubscriptionRepository <<Repository>> {
+        +getactiveusersubscription(userid)
+        +subscribeuser(userid, planid)
+    }
+    class AdRepository <<Repository>>
+    class AdViewRepository <<Repository>>
+    class ArticleViewRepository <<Repository>>
+    class NotificationRepository <<Repository>> {
+        +getunreadbyuser(userid)
+        +markasread(notificationid)
+    }
+
+    BaseRepository <|-- UserRepository
+    BaseRepository <|-- AdminRepository
+    BaseRepository <|-- ArticleRepository
+    BaseRepository <|-- AuthorRepository
+    BaseRepository <|-- CategoryRepository
+    BaseRepository <|-- CommentRepository
+    BaseRepository <|-- SubscriptionRepository
+    BaseRepository <|-- AdRepository
+    BaseRepository <|-- AdViewRepository
+    BaseRepository <|-- ArticleViewRepository
+    BaseRepository <|-- NotificationRepository
+}
+
+
+package "Domain Models (Entities)" <<Entities>> #ENTITY_COLOR {
+    class User <<Entity>> {
+        +id: int (PK)
+        +email: str (UNIQUE)
+        +username: str (UNIQUE)
+        +password: str
+        +preferences: JSON
+        +createdat: DateTime
+    }
+
+    class Admin <<Entity>> {
+        +id: int (PK)
+        +email: str (UNIQUE)
+        +password: str
+        +createdat: DateTime
+    }
+
+    class Article <<Entity>> {
+        +id: int (PK)
+        +authorid: int (FK)
+        +categoryid: int (FK)
+        +title: str
+        +content: str
+        +status: str
+        +isexclusive: bool
+        +isbreaking: bool
+        +viewscount: int
+        +createdat: DateTime
+    }
+
+    class Author <<Entity>> {
+        +id: int (PK)
+        +firstname: str
+        +lastname: str
+        +bio: str
+    }
+
+    class Category <<Entity>> {
+        +id: int (PK)
+        +name: str
+        +slug: str (UNIQUE)
+        +description: str
+        +issearchable: bool
+    }
+
+    class Comment <<Entity>> {
+        +id: int (PK)
+        +articleid: int (FK)
+        +userid: int (FK)
+        +text: str
+        +status: str
+        +createdat: DateTime
+    }
+
+    class ArticleInteraction <<Entity>> {
+        +id: int (PK)
+        +articleid: int (FK)
+        +userid: int (FK)
+        +interactiontype: str
+        +value: Numeric
+        +createdat: DateTime
+    }
+
+    class ArticleView <<Entity>> {
+        +id: int (PK)
+        +articleid: int (FK)
+        +userid: int (FK)
+        +sessionid: str
+        +ipaddress: str
+        +viewedat: DateTime
+    }
+
+    class ArticleKeyword <<Entity>> {
+        +id: int (PK)
+        +articleid: int (FK)
+        +keyword: str
+    }
+
+    class authorfollowers <<Entity>> {
+        +userid: int (PK, FK)
+        +authorid: int (PK, FK)
+    }
+
+    class SubscriptionPlan <<Entity>> {
+        +id: int (PK)
+        +name: str
+        +permissions: JSON
+        +pricepermonth: Numeric
+        +description: str
+    }
+
+    class UserSubscriptionPlan <<Entity>> {
+        +id: int (PK)
+        +userid: int (FK)
+        +planid: int (FK)
+        +startdate: DateTime
+        +isactive: bool
+    }
+
+    class Ad <<Entity>> {
+        +id: int (PK)
+        +title: str
+        +content: str
+        +adtype: str
+        +isactive: bool
+        +startdate: DateTime
+        +enddate: DateTime
+        +impressionscount: int
+        +clickscount: int
+    }
+
+    class AdView <<Entity>> {
+        +id: int (PK)
+        +adid: int (FK)
+        +userid: int (FK)
+        +sessionid: str
+        +ipaddress: str
+        +viewedat: DateTime
+    }
+
+    class Notification <<Entity>> {
+        +id: int (PK)
+        +userid: int (FK)
+        +articleid: int (FK)
+        +type: str
+        +title: str
+        +message: str
+        +isread: bool
+        +createdat: DateTime
+    }
+
+    class PushSubscription <<Entity>> {
+        +id: int (PK)
+        +userid: int (FK)
+        +endpoint: str (UNIQUE)
+        +p256dh: str
+        +auth: str
+    }
+
+    class NewsletterSubscription <<Entity>> {
+        +id: int (PK)
+        +userid: int (FK)
+        +authorid: int (FK)
+        +type: str
+        +isactive: bool
+        +props: JSON
+        +createdat: DateTime
+    }
+}
+
+
+package "Design Patterns" <<Patterns>> #PATTERN_COLOR {
+
+    package "Auth Strategy & Token Factory" <<Factory>> #FACTORY_COLOR {
+        abstract class AuthStrategy <<Pattern>> {
+            + {abstract} register(email, password)
+            + {abstract} authenticate(email, password)
+            + {abstract} refresh(token)
+        }
+
+        abstract class TokenFactory <<Pattern>> {
+            + {abstract} createtoken(entity, **kwargs): Dict
+            + {abstract} getfactorytype(): str
+        }
+
+        class UserTokenFactory <<Pattern>> {
+            - secretkey: str
+            - algorithm: str
+            ...
+            + createtoken(user: User, **kwargs): Dict
+            + getfactorytype(): str
+        }
+
+        class AdminTokenFactory <<Pattern>> {
+            - secretkey: str
+            - algorithm: str
+            ...
+            + createtoken(admin: Admin, **kwargs): Dict
+            + getfactorytype(): str
+        }
+        class TokenFactoryProducer <<Pattern>> {
+            - factories: Dict[str, TokenFactory]
+            --
+            + getfactory(factorytype: str): TokenFactory
+            + createtokensforuser(user: User): Dict
+            + createtokensforadmin(admin: Admin): Dict
+            + getavailablefactories(): list
+        }
+    }
+
+    package "Ad Selection Strategy" <<Strategy>> #STRATEGY_COLOR {
+        abstract class AdSelectionStrategy <<Pattern>> {
+            + {abstract} selectads(ads, limit): List
+        }
+
+        class DefaultAdStrategy <<Pattern>> {
+            + selectads(ads, limit): List
+        }
+
+        class RotationAdStrategy <<Pattern>> {
+            - rotationstate: defaultdict
+            + selectads(ads, limit): List
+        }
+
+        class RandomAdStrategy <<Pattern>> {
+            + selectads(ads, limit): List
+        }
+    }
+
+    package "Article Observer" <<Observer>> #OBSERVER_COLOR {
+        abstract class AbstractArticleObserver <<Pattern>> {
+            + {abstract} update(article, dbsession)
+        }
+
+        class GeneralNotifier <<Pattern>> {
+            + update(article, pushpayload, users, type)
+        }
+
+        class BreakingNewsNotifier <<Pattern>> {
+            + update(article, dbsession)
+        }
+
+        class CategoryNotifier <<Pattern>> {
+            + update(article, dbsession)
+        }
+
+        class AuthorNotifier <<Pattern>> {
+            + update(article, dbsession)
+        }
+    }
+}
+
+' --- Зв'язки: Сервіси -> Репозиторії ---
+ArticleService ..> ArticleRepository : використовує
+SubscriptionService ..> SubscriptionRepository : використовує
+CommentService ..> CommentRepository : використовує
+CommentService ..> ArticleRepository : використовує
+AdService ..> AdRepository : використовує
+AdService ..> AdViewRepository : використовує
+UserAuthService ..> UserRepository : використовує
+AdminAuthService ..> AdminRepository : використовує
+
+' --- Зв'язки: Сервісі -> Патерни ---
+UserAuthService ..> TokenFactoryProducer : використовує
+AdminAuthService ..> TokenFactoryProducer : використовує
+UserAuthService --|> AuthStrategy : реалізує
+AdminAuthService --|> AuthStrategy : реалізує
+AdService ..> AdSelectionStrategy : використовує стратегію
+
+' --- Зв'язки: Патерни -> Патерни ---
+TokenFactory <|-- UserTokenFactory
+TokenFactory <|-- AdminTokenFactory
+TokenFactoryProducer ..> TokenFactory : використовує
+AdSelectionStrategy <|-- DefaultAdStrategy
+AdSelectionStrategy <|-- RotationAdStrategy
+AdSelectionStrategy <|-- RandomAdStrategy
+AbstractArticleObserver <|-- GeneralNotifier
+GeneralNotifier <|-- BreakingNewsNotifier
+GeneralNotifier <|-- CategoryNotifier
+GeneralNotifier <|-- AuthorNotifier
+
+' --- Зв'язки всередині Моделей (Entities) ---
+User *-- "0..*" Notification : адресована до
+User *-- "0..*" PushSubscription : підписалась на push
+User *-- "0..*" NewsletterSubscription : підписана на
+User *-- "0..1" UserSubscriptionPlan : має підписку
+Article *-- "0..*" Comment : містить
+Article *-- "0..*" ArticleInteraction : отримує
+Article *-- "0..*" ArticleView : переглядається
+Article *-- "0..*" ArticleKeyword : має ключові слова
+Author *-- "0..*" Article : створює
+Ad *-- "0..*" AdView : має перегляди
+User o-- "0..*" ArticleInteraction : генерує
+User o-- "0..*" ArticleView : переглядає
+User o-- "0..*" authorfollowers : відстежує
+User o-- "0..*" Comment : пише
+User o-- "0..*" AdView : переглядає
+Article o-- "0..*" Notification : згадується в
+Author o-- "0..*" authorfollowers : має фоловерів
+Category o-- "0..*" Article : категоризує
+SubscriptionPlan o-- "0..*" UserSubscriptionPlan : пропонує
+authorfollowers -- User
+authorfollowers -- Author
+
+
+"Design Patterns" -[hidden]down-> "Business Logic (Services)"
+"Business Logic (Services)" -[hidden]down-> "Data Access (Repositories)"
+"Data Access (Repositories)" -[hidden]down-> "Domain Models (Entities)"
+
+UserAuthService -[hidden]right-> AdminAuthService
+
+UserRepository -[hidden]right-> AdminRepository
+
+@enduml
