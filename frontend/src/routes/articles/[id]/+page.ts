@@ -20,7 +20,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
   try {
     const articlePromise = api.get<ArticlePageData>(`/articles/${id}`, fetch);
-    const recPromise = api.get<ArticleListData>(`/articles/recommended?page=1&per_page=3`, fetch);
+    const recPromise = api.get<ArticleListData>(`/articles/recommended?page=1&per_page=3&article_id=${id}`, fetch);
 
     const [articleResult, recResult] = await Promise.allSettled([articlePromise, recPromise]);
 

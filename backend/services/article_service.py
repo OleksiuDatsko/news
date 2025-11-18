@@ -130,6 +130,7 @@ class ArticleService:
         per_page: int = 10,
         favorite_category_slugs: list[str] = None,
         filters: dict = None,
+        current_article_id: Optional[int] = None,
     ):
         """
         Сервісний шар для виклику репозиторію рекомендованих статей.
@@ -140,6 +141,7 @@ class ArticleService:
             user_id=user_id,
             favorite_category_slugs=favorite_category_slugs,
             filters=filters,
+            current_article_id=current_article_id,
         )
 
     def record_article_impression(

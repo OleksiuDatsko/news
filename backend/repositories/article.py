@@ -299,6 +299,7 @@ class ArticleRepository(BaseRepository):
         user_id: int = None,
         favorite_category_slugs: list[str] = None,
         filters: dict = None,
+        current_article_id: Optional[int] = None,
     ):
         """
         Отримує розширений список рекомендованих статей.
@@ -314,6 +315,8 @@ class ArticleRepository(BaseRepository):
         interacted_ids = self.get_user_interaction_article_ids(user_id)
         if interacted_ids:
             query = query.filter(Article.id.notin_(interacted_ids))
+            query = query.filter(Article.id.notin_([current_article_id]) if current_article_id else True)
+
 
         recommend_conditions = []
 

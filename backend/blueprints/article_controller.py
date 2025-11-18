@@ -60,6 +60,7 @@ def get_recommended_articles(current_user, ads=[]):
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 5, type=int)
     status = request.args.get("satus", "published", type=str)
+    current_article_id = request.args.get("article_id", type=int)
 
     article_repo = get_article_repo()
     article_service = ArticleService(article_repo)
@@ -78,6 +79,7 @@ def get_recommended_articles(current_user, ads=[]):
         per_page=per_page,
         favorite_category_slugs=fav_category_slugs,
         filters=filters,
+        current_article_id=current_article_id,
     )
 
     result = [article.to_dict(metadata=True) for article in articles]

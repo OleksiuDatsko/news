@@ -9,14 +9,14 @@
 
   let { data }: { data: PageData } = $props();
 
-  let article = $state(data.article);
+  let article = $derived(data.article);
   let isLoadingSave = $state(false);
   let isLoadingLike = $state(false);
   let isSaved = $state(false);
   let isLiked = $state(false);
   let likesCount = $state(0);
 
-  onMount(() => {
+  $effect(() => {
     if (article) {
       const key = `viewed_article_${article.id}`;
       if (!sessionStorage.getItem(key)) {
