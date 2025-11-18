@@ -74,9 +74,6 @@ class ArticleRepository(BaseRepository):
 
         query = query.filter(Article.status == "published")
 
-        if user_permissions and not user_permissions.get("exclusive_content", False):
-            query = query.filter(Article.is_exclusive == False)
-
         try:
             if date_from:
                 parsed_date_from = datetime.fromisoformat(date_from)
@@ -315,8 +312,9 @@ class ArticleRepository(BaseRepository):
         interacted_ids = self.get_user_interaction_article_ids(user_id)
         if interacted_ids:
             query = query.filter(Article.id.notin_(interacted_ids))
-            query = query.filter(Article.id.notin_([current_article_id]) if current_article_id else True)
-
+            query = query.filter(
+                Article.id.notin_([current_article_id]) if current_article_id else True
+            )
 
         recommend_conditions = []
 
