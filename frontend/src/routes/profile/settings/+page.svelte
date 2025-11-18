@@ -6,7 +6,7 @@
   import { categoryStore } from '$lib/stores/categoryStore';
   import type { IUser } from '$lib/types/user';
   import { onMount } from 'svelte';
-  import { subscribeToPush } from '$lib/utils/push-notifications';
+  import { subscribeToPush, unsubscribeFromPush } from '$lib/utils/push-notifications';
 
   let allCategories = $derived($categoryStore);
 
@@ -108,6 +108,18 @@
       newsletterLoading = false;
     }
   }
+  async function handleUnsubscription() {
+        error = '';
+        pushSuccess = '';
+        try {
+            await unsubscribeFromPush();
+            isSubscribed = false;
+            pushSuccess = 'Ви успішно відписалися від сповіщень.';
+        } catch (e) {
+            console.error('Помилка відписки:', e);
+            error = 'Помилка при відписці від Push-сповіщень.';
+        }
+    }
 </script>
 
 <svelte:head>
@@ -156,6 +168,10 @@
           <span class="font-medium text-gray-700"> Отримувати сповіщення в браузері </span>
           {#if isSubscribed}
             <span class="text-sm font-medium text-green-600">✔ Підписано</span>
+            <Button onclick={handleUnsubscription} type="button" class="!w-auto !py-2 !px-4"
+>
+              Вимкнути
+            </Button>
           {:else}
             <Button
               type="button"

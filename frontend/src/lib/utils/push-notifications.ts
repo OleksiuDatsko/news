@@ -52,3 +52,33 @@ export async function subscribeToPush() {
 
   return subscription;
 }
+
+export async function unsubscribeFromPush(): Promise<void> {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    return;
+  }
+
+  const registration = await navigator.serviceWorker.ready;
+  const subscription = await registration.pushManager.getSubscription();
+
+  if (!subscription) {
+    console.log('Користувач не підписаний, нічого скасовувати.');
+    return;
+  }
+
+  const endpoint = subscription.endpoint;
+  const successfulUnsubscribe = await subscription.unsubscribe();
+
+  if (successfulUnsubscribe) {
+    console.log('Підписка успішно скасована в браузері.');
+
+    try {
+      await api.post('/notifications/unsubscribe', { endpoint });
+      console.log('Відписка успішно надіслана на сервер.');
+    } catch (err) {
+      console.error('Помилка при видаленні підписки з сервера:', err);
+    }
+  } else {
+    throw new Error('Не вдалося скасувати підписку в браузері.');
+  }
+}

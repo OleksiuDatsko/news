@@ -17,7 +17,7 @@ export const load: PageLoad = async ({ params, fetch, url }) => {
   try {
     const author = await api.get<IAuthor>(`/admin/authors/${id}`, fetch);
     const articlesData = await api.get<AuthorArticleData>(
-      `/admin/authors/${id}/articles?page=${page}&per_page=5`,
+      `/admin/authors/${id}/articles?page=${page}&per_page=3`,
       fetch
     );
     return {

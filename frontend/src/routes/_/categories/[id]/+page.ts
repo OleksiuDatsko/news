@@ -19,7 +19,7 @@ export const load: PageLoad = async ({ params, fetch, url }) => {
   try {
     const categoryData = await api.get<ICategory>(`/admin/categories/${id}`, fetch);
     const articlesData = await api.get<CategoryArticleData>(
-      `/admin/categories/${id}/articles?page=${page}&per_page=5`,
+      `/articles/?category=${id}&page=${page}&per_page=3`,
       fetch
     );
 
