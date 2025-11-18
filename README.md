@@ -1,112 +1,135 @@
-# Online Newspaper Web Application
+# Онлайн-газета (Online Newspaper Web Application)
 
-## Overview
+## Огляд
 
-This project is a modern online newspaper platform featuring news articles, analytics, thematic categories, and archive access. It supports personalized news feeds, subscriptions, comments, and notifications.
-
-Built with a clean architecture leveraging design patterns (GoF) and best coding practices, it provides extensibility, maintainability, and scalability.
-
+Цей проект є сучасною веб-платформою для онлайн-газети, що пропонує новинні статті, аналітику, тематичні категорії та доступ до архіву. Він підтримує персоналізовані стрічки новин, систему підписок, коментарі та сповіщення. Побудований на засадах **чистої архітектури** із застосуванням патернів проєктування **GoF** та найкращих практик кодування, що забезпечує його розширюваність, ремонтопридатність та масштабованість.
 ---
 
-## Features
+## Технічне Завдання
 
-- **News Feed**
-  - Homepage displays latest and recommended articles.
-  - Thematic categories such as Politics, Economy, Culture, Sports, Technology.
-  - Advanced search with filters by keywords, authors, and date.
-  
-- **User Personalization**
-  - Favorite topics and categories settings.
-  - Recommendation system based on views and likes.
-  
-- **User Profiles**
-  - Subscription to newsletters and push notifications.
-  - Commenting and rating articles.
-  - Articles saved for later reading.
-  
-- **Subscription System**
-  - Free access with ads.
-  - Paid subscriptions with ad-free experience and exclusive articles.
-  - Special packages for students.
-  
-- **Notification System**
-  - Breaking news alerts.
-  - Daily news digests.
-  - Notifications on new articles by favorite authors.
+Система "Онлайн-газета" реалізує повний життєвий цикл новинного ресурсу:
 
+1.  **Контент-менеджмент (Admin Panel):** Повний CRUD-функціонал для управління статтями, авторами, категоріями, користувачами, рекламними оголошеннями та планами підписок.
+2.  **Персоналізація для користувачів:**
+    * Персоналізована стрічка новин та рекомендації на основі вподобань та переглядів.
+    * Можливість ставити лайки, зберігати статті для подальшого читання та залишати коментарі.
+3.  **Система Підписок:**
+    * Базовий (безкоштовний) доступ з інтегрованою рекламою.
+    * Платні підписки, що надають доступ до контенту без реклами та до **ексклюзивних статей**.
+4.  **Система Сповіщень:**
+    * Сповіщення про важливі новини (**Breaking News**) та щоденні дайджести.
+    * Сповіщення про вихід нових статей від авторів, на яких підписаний користувач.
+5.  **Рекламний модуль:** Система для відображення та обліку (кліків/показів) рекламних оголошень.
 ---
 
-## Technology Stack
+## Функціонал (Features)
 
-- **Frontend:** Svelte 5 + SvelteKit
-- **Backend:** Python Flask with Dependency Injection (DI)
-- **Database:** SQLite (with potential PostgreSQL support)
-- **API:** RESTful endpoints
-- **Authentication:** JWT (JSON Web Tokens)
-- **Design Patterns:** Singleton, Factory, Observer, Strategy, Facade
-  
+- **Новинна Стрічка**
+  - Головна сторінка відображає останні та рекомендовані статті.
+  - Тематичні категорії (Політика, Економіка, Культура, Спорт, Технології).
+  - Розширений пошук з фільтрами за ключовими словами, авторами та датою.
+- **Профілі Користувачів**
+  - Коментування та оцінювання статей.
+  - Збереження статей для читання пізніше.
+  - Підписка на розсилки (щоденний дайджест) та push-сповіщення.
+- **Система Підписок та монетизація**
+  - Безкоштовний доступ з рекламою.
+  - Платні підписки з доступом без реклами та до ексклюзивних матеріалів.
+  - Спеціальні студентські пакети.
+- **Система Сповіщень**
+  - Push-сповіщення про важливі новини (Breaking News).
+  - Генерація щоденних новинних дайджестів (Daily Digest).
+  - Сповіщення про нові статті від улюблених авторів.
 ---
 
-## Architecture
+## UML Діаграми та Патерни Проектування GoF
 
-- Separation of concerns with layers:
-  - Models (SQLAlchemy ORM)
-  - Repository layer for data access abstraction
-  - Services encapsulating business logic
-  - Controllers / Blueprints handling HTTP requests
-- Dependency Injection container for flexible component resolution.
-- Background tasks for notification delivery and digest generation.
+Візуальна документація архітектури системи міститься в директорії `assets/` (`class_diagram.puml`, `use-case-diagram.puml`).
 
+- **Use-Case Diagram:** Описує взаємодію між основними акторами (Користувач, Адміністратор, Автор) та ключовими функціями системи (Читання новин, Управління контентом, Підписка).
+
+- **Class Diagram:** Відображає статичну структуру системи (сутності `Article`, `User`, `Author`, `Ad` та зв'язки між ними).
+
+### Застосовані Патерни Проектування (GoF)
+
+Проект використовує наступні патерни для забезпечення гнучкості та чистоти архітектури:
+
+1.  **Observer (Спостерігач):** Реалізований у системі сповіщень. При публікації нової статті (Subject) автоматично сповіщаються всі підписані користувачі (Observers) про оновлення (**Breaking News** або нові статті від авторів).
+2.  **Strategy (Стратегія):** Використовується в рекламному модулі (`ad_strategy.py`) для інкапсуляції різних алгоритмів відображення реклами, що дозволяє легко додавати нові стратегії без зміни основного сервісу.
+3.  **Facade (Фасад):** Використовується в шарі сервісів (`services/`), які надають спрощений, єдиний інтерфейс до складної бізнес-логіки, що включає роботу з декількома репозиторіями (наприклад, `ArticleService`).
+4.  **Factory (Фабрика):** Застосовується для створення об'єктів репозиторіїв та сервісів, абстрагуючи логіку створення від клієнтського коду (наприклад, `repositories/repositories.py`).
+5.  **Singleton (Одинак):** Ймовірно, використовується в контейнері залежностей (`di/container.py`) для забезпечення єдиного екземпляра важливих об'єктів (наприклад, підключення до бази даних).
 ---
 
-## Setup & Installation
+## Технологічний Стек
 
-### Backend Setup
+- **Frontend:** **Svelte 5 + SvelteKit** (сучасний реактивний фреймворк).
+- **Backend:** **Python Flask** (легковаговий мікрофреймворк) із застосуванням **Dependency Injection (DI)**.
+- **Database:** **SQLite** (для розробки, із можливістю міграції на **PostgreSQL**).
+- **API:** **RESTful** архітектура.
+- **Authentication:** **JWT (JSON Web Tokens)**.
+---
 
-1. Clone repository:
+## Архітектура (Код проекту)
 
-```
-git clone https://github.com/OleksiuDatsko/news.git
+Проект має **шарову архітектуру**, що базується на принципах **Clean Architecture** з чітким розділенням відповідальності (Separation of Concerns).
+
+1.  **Models (ORM):** Моделі даних SQLAlchemy, що відображають таблиці БД (`models/`).
+2.  **Repository Layer:** Абстракція доступу до даних (`repositories/`). Приховує деталі роботи з БД від бізнес-логіки.
+3.  **Services Layer:** Шар **бізнес-логіки** (`services/`). Містить основні правила роботи додатку та реалізацію більшості патернів GoF.
+4.  **Controllers / Blueprints:** Шар обробки HTTP-запитів (`blueprints/`). Отримує запити, викликає сервіси та повертає відповіді.
+5.  **Tasks:** Фонове виконання завдань (наприклад, `tasks/daily_digest.py` для щоденних дайджестів) за допомогою Cron-воркера.
+---
+
+## Запуск та Встановлення
+
+Для найпростішого розгортання рекомендується використовувати Docker Compose.
+
+### 1. Запуск через Docker Compose
+
+Цей метод автоматично налаштує бекенд, фронтенд, Nginx (як зворотний проксі) та Cron-воркер.
+
+1.  **Клонуйте репозиторій:**
+    ```bash
+    git clone https://github.com/OleksiuDatsko/news.git
+    cd oleksiudatsko-news
+    ```
+2.  **Налаштуйте змінне оточення:**
+    * Створіть файл `.env` у директорії `backend/` на основі `backend/.env.example`.
+    * Сконфігуруйте необхідні змінні (наприклад, `DATABASE_URL`, `JWT_SECRET_KEY`).
+3.  **Запустіть проект:**
+    ```bash
+    docker-compose up --build -d
+    ```
+4.  **Доступ:**
+    * Фронтенд буде доступний за адресою: `http://localhost:80`.
+    * Адмін-панель: `http://localhost:80/_/dashboard` (після логіну).
+
+### 2. Локальне встановлення
+
+#### Backend Setup
+```bash
 cd backend
-```
-
-2. Create and activate virtual environment:
-
-```
 python -m venv venv
-source venv/bin/activate 
-```
-
-3. Install Python dependencies:
-
-```
+source venv/bin/activate
 pip install -r requirements.txt
-```
-
-4. Create `.env` file based on `.env.example` and configure environment variables (e.g., `DATABASE_URL`, `JWT_SECRET_KEY`).
-
-5. Start backend server:
-
-```
+python seed.py
 python app.py
 ```
-
-#### Admin Login
-email: admin@some.com
-password: admin
-
-### Frontend Setup
-
-1. Install dependencies:
-
-```
-yarn
-```
-
-2. Run development server:
-
-```
+#### Frontend Setup
+```bash
+cd frontend
+yarn install
 yarn run dev
 ```
 
+#### Облікові дані Адміністратора (для початкового наповнення БД):
 
+Дані для логіну беруться із `.env` файлу
+
+**Адмін доступ**
+- **Email:** `admin@news.com`
+- **Password:** `admin-password`
+
+**Користувачі**
+- **Password:** `user-password`
