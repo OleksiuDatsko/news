@@ -221,7 +221,7 @@ def toggle_save_article(current_user, article_id):
 
 @article_bp.route("/<int:article_id>/toggle-like", methods=["POST"])
 @token_required
-def toggle_like_article(current_user):
+def toggle_like_article(current_user, article_id):
     """Перемикає статус лайка статті"""
     if current_user.is_admin:
         return jsonify({"msg": "Адмін не може оцінювати статті"}), 403
